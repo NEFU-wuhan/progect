@@ -18,11 +18,9 @@
 #include "common.h"
 #include "VCAN_LCD.h"
 #include "include.h"
-//extern long int rightval;
-//extern long int leftval;
-//extern int32 speedaboutangle;
-//extern int32 speedaboutangle2;
- void LCD_line(line_info  line[],uint16 Color,uint16 bkColor);
+
+
+// void LCD_line(line_info  line[],uint16 Color,uint16 bkColor);
 
 /*!
  *  @brief      LCD初始化
@@ -42,44 +40,9 @@ void LCD_init(void)
     size.H = LCD_H;
 
     LCD_rectangle(site, size, BCOLOUR);     //初始化背景
+
 }
-////-------------------------------------------------
-////                 显示中线及边线
-////输入 边线及中线数组line_info  line[] ，中线颜色 uint16 Color，暂时没用 uint16 bkColor
-////输出 void
-////功能 显示中线及边线
-////日期
-////作者
-////--------------------------------------------------
-//void LCD_show(void)
-//{
-//         static Site_t   camera_site={0,0};                           //显示图像左上角位置
-//         static Size_t   camera_imgsize={128,80};
-//
-//         static Site_t  site_duoji_count={20,84};
-//        static Site_t  site_mid_line={70,84};
-////       static Site_t  site_used_length={112,112};
-//         static Site_t  site_maichong1={20,98};
-//         static Site_t  site_maichong2={20,112};
-//         
-//         static Site_t  site_maichong3={70,98};
-//         static Site_t  site_maichong4={70,112};
-//         
-//         
-//         
-//         LCD_Img_Binary_My(camera_site,camera_imgsize,img);  //显示图像
-//         LCD_line(line,RED,GREEN);                           //画出边线和中线
-//         LCD_num(site_duoji_count,SE_duty ,BLUE,RED);            //显示舵机打角
-//         LCD_float(site_mid_line,mid_line,BLUE,RED);    //显示中线值
-////          LCD_num_BC(site_used_length,used_length,3,BLUE,RED);   //显示有用行
-//         
-//         
-//         LCD_float(site_maichong1,leftval,BLUE,RED);       //显示右编码器获取的脉冲数
-//         LCD_float(site_maichong2,rightval,BLUE,RED);      //显示左编码器获取的脉冲数
-//
-//         LCD_float(site_maichong3,speedaboutangle,BLUE,RED);
-//         LCD_float(site_maichong4,speedaboutangle2,BLUE,RED);         
-//}
+
 /*******************************************************************************
  * Function Name: LCD_Img_Binary_My(site, size, img);
  * Input Param  : site          左上角坐标

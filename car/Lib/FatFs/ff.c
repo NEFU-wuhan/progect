@@ -2746,8 +2746,8 @@ FRESULT f_read (
 FRESULT f_write (
     FIL *fp,            /* Pointer to the file object */
     const void *buff,   /* Pointer to the data to be written */
-    uint32 btw,         /* Number of bytes to write */
-    uint32 *bw          /* Pointer to number of bytes written */
+    uint32 btw,         /* Number of bytes to write 写的字节数*/
+    uint32 *bw          /* Pointer to number of bytes written 指针写的字节数 */
 )
 {
     FRESULT res;
@@ -4416,7 +4416,7 @@ int f_putc (
     if (c == '\n') f_putc ('\r', fil);  /* LF -> CRLF conversion */
 #endif
 
-#if _LFN_UNICODE    /* Write the character in UTF-8 encoding */
+#if _LFN_UNICODE    /* Write the character in UTF-8 encoding 写字符的utf - 8编码 */
     if (c < 0x80)           /* 7-bit */
     {
         s[0] = (uint8)c;

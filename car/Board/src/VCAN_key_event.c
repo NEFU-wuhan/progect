@@ -16,8 +16,10 @@
 
 #include "VCAN_key_event.h"
 #include "VCAN_UI_VAR.h"
-#include "display_zq.h"
-#include "Menu_control.h"
+#include "O_display.h"
+#include "O_menu_control.h"
+#include "main.h"
+#include "O_speed.h"
 
 //#include "NRF24L0.h"
 //#include "NRF24L0_MSG.h"
@@ -29,7 +31,6 @@ int8 flag_key_l_u_2=0;
 int8 flag_key_l_u_3=0;
 int8 flag_key_l_u_4=0;
 
-extern long int DJ_protect;
 
 //-------------------------------------------------
 //                 舵机控制
@@ -46,10 +47,10 @@ void key_event_init()
 //    var_init();   //初始化临时变量
 
     //同步全部数据并显示
-//    var_syn(VAR_MAX);       //同步全部 ,必须先同步再显示全部，因为有可能同步失败。
-//    var_display(VAR_MAX);   //显示全部
+    var_syn(VAR_MAX);       //同步全部 ,必须先同步再显示全部，因为有可能同步失败。
+    var_display(VAR_MAX);   //显示全部
 }
- 
+
 
 /*******************************************************************************
 * Function Name: void deal_key_event()
@@ -65,6 +66,7 @@ void deal_key_event()
     while(get_key_msg(& keymsg))     //获得按键就进行处理
     {
         color_init();
+        shua_one=0;
         if(keymsg.status == KEY_DOWN)
         {
             switch(keymsg.key)
@@ -245,12 +247,18 @@ void deal_key_select()
               break;
             case 4:       //开车
               {
-                   DELAY_MS(500);
-                   DJ_protect=0;
-                   Motor_En=1;
-                   Start_timing=System_time;    //开车的时候需要记录系统时间用于延时发车
-                   flag_key_select=5;
-                   flag_key_l_u_0=0;
+                DELAY_MS(500);
+                DJ_protect=0;
+                Motor_En=1;
+                speedwantD=100;
+                speedwantE=110;
+                Start_timing=System_time;    //开车的时候需要记录系统时间用于延时发车
+                flag_key_select=5;
+                flag_key_l_u_0=0;
+                var2=1;
+                updata_var(VAR2);                //更新编号变量的值（修改变量的值后，需要调用此函数来更新编号变量的值）
+                tongbu[2]=10;
+
               }
               break;
             }
@@ -353,8 +361,13 @@ void deal_key_select()
     break;
   case 5:        //表示现在停留在开车显示页面
     {
-
-        flag_key_select=0;
+      flag_key_select=0;
+      fache=0;
+      speedwantD=0;
+      speedwantE=0;
+      var2=0;
+      updata_var(VAR2);                //更新编号变量的值（修改变量的值后，需要调用此函数来更新编号变量的值）
+      tongbu[2]=10;
     }
     break;
   default:
@@ -524,7 +537,8 @@ void deal_key_left()
               break;
             case 1:
               {
-
+                   weizhi_turn--;
+//                   tongbu[1]=1;
               }
               break;
             case 2:
@@ -712,7 +726,7 @@ void deal_key_right()
       }
     case 4:
       {
-          switch (flag_key_l_u_4)      //调整电机的参数
+          switch (flag_key_l_u_4)      //调整qita的参数
             {
             case 0:       //上一页
               {
@@ -720,7 +734,8 @@ void deal_key_right()
               break;
             case 1:
               {
-
+                    weizhi_turn++;
+//                    tongbu[1]=1;
               }
               break;
             case 2:

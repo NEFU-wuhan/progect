@@ -1,6 +1,7 @@
 #include "common.h"
+#include "main.h"
 
-
+uint16 camera_boundary=16;
 //压缩二值化图像解压（空间 换 时间 解压）
 //srclen 是二值化图像的占用空间大小
 //【鹰眼解压】鹰眼图像解压，转为 二维数组 - 智能车资料区 - 山外论坛 http://vcan123.com/forum.php?mod=viewthread&tid=17&ctid=6
@@ -67,7 +68,19 @@ void img_extract(void *dst, void *src, uint32_t srclen)
             *p_all++ = color[ (tmpsrc >> 1 ) & 0x01 ];
             *p_all++ = color[ (tmpsrc >> 0 ) & 0x01 ];
         }
-        for(j=18;j<146;j++)//8  136 11  139 18 146
+
+#if (CAR_MODEL==1  )
+        camera_boundary=10;
+//        for(j=13;j<141;j++)
+#elif (CAR_MODEL==2  )
+          camera_boundary=25;
+//        for(j=25;j<153;j++)   //27-155
+#elif (CAR_MODEL==3 )
+          camera_boundary=17;
+//        for(j=17;j<145;j++)
+#endif
+
+        for(j=camera_boundary;j<camera_boundary+128;j++)
         {
             *dst++ = all_img[j];
         }

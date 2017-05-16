@@ -37,7 +37,7 @@
 #define YELLOW  0xFFE0    //黄色
 
 #define FCOLOUR         BLUE    //定义字体颜色
-#define BCOLOUR         RED     //定义背景颜色
+#define BCOLOUR         BLACK     //定义背景颜色
 
 //提取RGB的3元素，rgb565必须是16位
 #define RGB565_R(rgb565)                ((uint8)(((uint16)(rgb565)>>11) &0x1F))
@@ -94,8 +94,6 @@
 void LCD_init(void);                                                                                    //LCD初始化
 
 /***************  LCD绘画  ***************/
-extern void LCD_show(void);
-
 extern void LCD_Img_Binary_My(Site_t site, Size_t size, uint8 *img);
 //extern void LCD_line(line_info  line[],uint16 Color,uint16 bkColor);
 extern void LCD_Img_RGB565_Z(Site_t site,Size_t size,const uint16 *img,Size_t imgsize);

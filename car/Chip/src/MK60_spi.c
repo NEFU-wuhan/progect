@@ -17,6 +17,8 @@
 #include "common.h"
 #include "MK60_port.h"
 #include "MK60_spi.h"
+#include "MK60_gpio.h"
+
 
 
 SPI_MemMapPtr SPIN[3] = {SPI0_BASE_PTR, SPI1_BASE_PTR, SPI2_BASE_PTR}; //¶¨ÒåÈý¸öÖ¸ÕëÊý×é±£´æ SPIx µÄµØÖ·
@@ -27,7 +29,76 @@ SPI_MemMapPtr SPIN[3] = {SPI0_BASE_PTR, SPI1_BASE_PTR, SPI2_BASE_PTR}; //¶¨ÒåÈý¸
 #define SPI_RX_WAIT(SPIn)     while(  ( SPI_SR_REG(SPIN[SPIn]) & SPI_SR_RFDF_MASK ) == 0 )  //µÈ´ý·¢ËÍ FIFOÎª·Ç¿Õ
 #define SPI_EOQF_WAIT(SPIn)   while(  (SPI_SR_REG(SPIN[SPIn]) & SPI_SR_EOQF_MASK ) == 0 )   //µÈ´ý´«ÊäÍê³É
 
+/*!
+ *  @brief      ÉèÖÃspiÆµÂÊ
+ *  @param      SPIn_e          SPIÄ£¿é(SPI0¡¢SPI1¡¢SPI2)
+ *  @param      baud            SPIÆµÂÊ
+ *  @since      v5.0
+ *  Sample usage:       spi_set_baud (SPI1,200*1000);    //³õÊ¼»¯SPI¹¤×÷ÆµÂÊÎª20Íò
+ */
+uint32 spi_set_baud(SPIn_e spin,uint32 baud)
+{
+    uint32 clk;
+    uint8  spr;
+    uint32 fit_baud,fit_sppr=0,fit_spr,min_diff =~0,diff;
+    uint32 tmp,tmp_baud;
 
+    if(spin == SPI0)
+    {
+        clk =  bus_clk_khz*1000;
+    }
+    else if(spin == SPI1)
+    {
+        clk =  core_clk_khz*1000;
+    }
+
+    //SPI ²¨ÌØÂÊ =  SPI Ä£¿éÊ±ÖÓ / £¨ (SPPR + 1) * (2<<(SPR )) £©
+    for(spr = 0;spr<=8;spr++)
+    {
+        tmp = clk/((2<<spr)*baud );
+        if(tmp>=8)continue;
+        tmp_baud  = clk/((2<<spr)*tmp);
+        diff = abs(tmp_baud - baud);
+        if(min_diff > diff)
+        {
+            min_diff = diff;
+            fit_spr = spr;
+            fit_sppr = tmp -1;
+            fit_baud = tmp_baud;
+            if(diff == 0)
+            {
+                //¸ÕºÃÆ¥Åä
+                goto SPI_CLK_EXIT;
+            }
+        }
+        tmp++;
+        tmp = clk/((2<<spr)*baud );
+        if(tmp>=8)continue;
+        tmp_baud  = clk/((2<<spr)*tmp);
+        diff = abs(tmp_baud - baud);
+
+        if(min_diff > diff)
+        {
+            min_diff = diff;
+            fit_spr = spr;
+            fit_sppr = tmp -1;
+            fit_baud = tmp_baud;
+            if(diff == 0)
+            {
+                //¸ÕºÃÆ¥Åä
+                goto SPI_CLK_EXIT;
+            }
+
+        }
+    }
+SPI_CLK_EXIT:
+
+    SPI_CTAR_REG(SPIN[spin], 0) = (0
+                                | SPI_CTAR_CSSCK(fit_spr)
+                                | SPI_CTAR_PCSSCK(fit_sppr)
+                                );
+    return fit_baud;
+}
 /*!
  *  @brief      SPI³õÊ¼»¯£¬ÉèÖÃÄ£Ê½
  *  @param      SPIn_e          SPIÄ£¿é(SPI0¡¢SPI1¡¢SPI2)
@@ -87,8 +158,11 @@ uint32 spi_init(SPIn_e spin, SPI_PCSn_e pcs, SPI_CFG master,uint32 baud)
         port_init(SPI1_SOUT_PIN, ALT2  );
         port_init(SPI1_SIN_PIN , ALT2  );
 
+
         if(pcs & SPI_PCS0)
+        {
             port_init(SPI1_PCS0_PIN, ALT2  );
+        }
 
         if(pcs & SPI_PCS1)
             port_init(SPI1_PCS1_PIN, ALT2  );
@@ -418,5 +492,8 @@ void spi_mosi_cmd(SPIn_e spin, SPI_PCSn_e pcs, uint8 *mocmd , uint8 *micmd , uin
     }
     SPI_SR_REG(SPIN[spin]) |= SPI_SR_RFDF_MASK;
 }
+
+
+
 
 

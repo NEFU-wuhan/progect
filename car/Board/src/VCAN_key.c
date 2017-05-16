@@ -28,7 +28,7 @@
  * 定义 KEY 编号对应的管脚
  */
 PTXn_e KEY_PTxn[KEY_MAX] = {PTC5, PTC16, PTC4, PTC3, PTD13, PTC17, PTC18, PTC19};
-                           //上    下    左   右    独立   选择   启动   停车                                                                       //    PTC14    PTC15
+                           //上    下    左   右    独立   选择   启动   停车                                //    PTC14    PTC15
 
 /*!
  *  @brief      初始化key端口(key 小于 KEY_MAX 时初始化 对应端口，否则初始化全部端口)

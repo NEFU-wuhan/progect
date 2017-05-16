@@ -50,12 +50,11 @@ typedef enum
 
 
 extern uint32 spi_init       (SPIn_e, SPI_PCSn_e , SPI_CFG,uint32 baud);                                        //SPI初始化，选择片选信号，设置模式，波特率
-uint32 spi_set_baud (SPIn_e,                      uint32 baud);
+extern uint32 spi_set_baud (SPIn_e,                      uint32 baud);
 
 //主机接收发送函数
 extern void spi_mosi       (SPIn_e, SPI_PCSn_e pcs,                              uint8 *modata, uint8 *midata,               uint32 len);    //SPI发送接收函数,发送databuff数据，并把接收到的数据存放在databuff里(注意，会覆盖原来的databuff)
 extern void spi_mosi_cmd   (SPIn_e, SPI_PCSn_e pcs, uint8 *mocmd , uint8 *micmd , uint8 *modata, uint8 *midata, uint32 cmdlen , uint32 len); //SPI发送接收函数,与spi_mosi相比，多了先发送cmd 缓冲区的步骤，即分开两部分发送
-
 
 
 #endif  // __MK60_SPI_H__

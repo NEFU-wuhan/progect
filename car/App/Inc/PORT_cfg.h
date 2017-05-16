@@ -108,11 +108,11 @@
 #define SPI0_PCS5_PIN   PTB23       // PTB23                    ALT3
 
 
-#define SPI1_SCK_PIN    PTB11       // PTE2、PTB11、            全部都是 ALT2
-#define SPI1_SOUT_PIN   PTB16       // PTE1、PTB16、            全部都是 ALT2
-#define SPI1_SIN_PIN    PTB17       // PTE3、PTB17、            全部都是 ALT2
+#define SPI1_SCK_PIN    PTE2       // PTE2、PTB11、            全部都是 ALT2
+#define SPI1_SOUT_PIN   PTE1       // PTE1、PTB16、            全部都是 ALT2
+#define SPI1_SIN_PIN    PTE3       // PTE3、PTB17、            全部都是 ALT2
 
-#define SPI1_PCS0_PIN   PTB10       // PTE4、PTB10、            全部都是 ALT2
+#define SPI1_PCS0_PIN   PTE4       // PTE4、PTB10、            全部都是 ALT2
 #define SPI1_PCS1_PIN   PTE0        // PTE0、PTB9、             全部都是 ALT2
 #define SPI1_PCS2_PIN   PTE5        // PTE5、                   全部都是 ALT2
 #define SPI1_PCS3_PIN   PTE6        // PTE6、                   全部都是 ALT2

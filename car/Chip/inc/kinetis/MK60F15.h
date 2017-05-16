@@ -16411,21 +16411,38 @@ typedef struct SMC_MemMap {
  * @addtogroup SPI_Peripheral SPI
  * @{
  */
+#define spi_shanwai  0   //等于0使用山外的SPI
 
+#if  spi_shanwai
 /** SPI - Peripheral register structure */
 typedef struct SPI_MemMap {
-  uint32_t MCR;                                    /**< DSPI Module Configuration Register, offset: 0x0 */
+  uint8_t S;                                       /**< SPI status register, offset: 0x0        SPI状态寄存器,抵消:0 x0*/
+  uint8_t BR;                                      /**< SPI baud rate register, offset: 0x1     SPI波特率登记,抵消:0 x1*/
+  uint8_t C2;                                      /**< SPI control register 2, offset: 0x2     SPI控制寄存器2,抵消:0 x2*/
+  uint8_t C1;                                      /**< SPI control register 1, offset: 0x3     SPI控制寄存器1,抵消:0 x3*/
+  uint8_t ML;                                      /**< SPI match register low, offset: 0x4 */
+  uint8_t MH;                                      /**< SPI match register high, offset: 0x5 */
+  uint8_t DL;                                      /**< SPI data register low, offset: 0x6      SPI数据寄存器低,抵消:0 x6 */
+  uint8_t DH;                                      /**< SPI data register high, offset: 0x7 */
+  uint8_t RESERVED_0[2];
+  uint8_t CI;                                      /**< SPI clear interrupt register, offset: 0xA       SPI明显中断寄存器,抵消:0 xa*/
+  uint8_t C3;                                      /**< SPI control register 3, offset: 0xB             SPI控制寄存器3,抵消:0 xb*/
+} volatile *SPI_MemMapPtr;
+#else
+/** SPI - Peripheral register structure */
+typedef struct SPI_MemMap {
+  uint32_t MCR;                                    /**< DSPI Module Configuration Register, offset: 0x0    DSPI模块配置寄存器,偏移量：0x0*/
   uint8_t RESERVED_0[4];
-  uint32_t TCR;                                    /**< DSPI Transfer Count Register, offset: 0x8 */
-  union {                                          /* offset: 0xC */
-    uint32_t CTAR[2];                                /**< DSPI Clock and Transfer Attributes Register (In Master Mode), array offset: 0xC, array step: 0x4 */
-    uint32_t CTAR_SLAVE[1];                          /**< DSPI Clock and Transfer Attributes Register (In Slave Mode), array offset: 0xC, array step: 0x4 */
+  uint32_t TCR;                                    /**< DSPI Transfer Count Register, offset: 0x8  DSPI传输计数寄存器,抵消:0×8*/
+  union {                                          /* offset: 0xC 抵消:0 xc*/
+    uint32_t CTAR[2];                                /**< DSPI Clock and Transfer Attributes Register (In Master Mode), array offset: 0xC, array step: 0x4  DSPI时钟和转移属性注册(在主模式),数组偏移:0 xc数组步骤:0 x4 */
+    uint32_t CTAR_SLAVE[1];                          /**< DSPI Clock and Transfer Attributes Register (In Slave Mode), array offset: 0xC, array step: 0x4   DSPI时钟和转移属性寄存器(被动式),数组偏移:0 xc数组步骤:0 x4*/
   };
   uint8_t RESERVED_1[24];
-  uint32_t SR;                                     /**< DSPI Status Register, offset: 0x2C */
-  uint32_t RSER;                                   /**< DSPI DMA/Interrupt Request Select and Enable Register, offset: 0x30 */
+  uint32_t SR;                                     /**< DSPI Status Register, offset: 0x2C x2c DSPI状态寄存器,抵消:0 */
+  uint32_t RSER;                                   /**< DSPI DMA/Interrupt Request Select and Enable Register, offset: 0x30 DMA和中断请求选择并启用注册,抵消:0 x30*/
   union {                                          /* offset: 0x34 */
-    uint32_t PUSHR;                                  /**< DSPI PUSH TX FIFO Register In Master Mode, offset: 0x34 */
+    uint32_t PUSHR;                                  /**< DSPI PUSH TX FIFO Register In Master Mode, offset: 0x34 DSPI推动TX FIFO寄存器在主模式中,抵消:0 x34 */
     uint32_t PUSHR_SLAVE;                            /**< DSPI PUSH TX FIFO Register In Slave Mode, offset: 0x34 */
   };
   uint32_t POPR;                                   /**< DSPI POP RX FIFO Register, offset: 0x38 */
@@ -16439,7 +16456,7 @@ typedef struct SPI_MemMap {
   uint32_t RXFR2;                                  /**< DSPI Receive FIFO Registers, offset: 0x84 */
   uint32_t RXFR3;                                  /**< DSPI Receive FIFO Registers, offset: 0x88 */
 } volatile *SPI_MemMapPtr;
-
+#endif
 /* ----------------------------------------------------------------------------
    -- SPI - Register accessor macros
    ---------------------------------------------------------------------------- */
@@ -16449,7 +16466,21 @@ typedef struct SPI_MemMap {
  * @{
  */
 
+#if spi_shanwai
 
+/* SPI - Register accessors */
+#define SPI_S_REG(base)                          ((base)->S)
+#define SPI_BR_REG(base)                         ((base)->BR)
+#define SPI_C2_REG(base)                         ((base)->C2)
+#define SPI_C1_REG(base)                         ((base)->C1)
+#define SPI_ML_REG(base)                         ((base)->ML)
+#define SPI_MH_REG(base)                         ((base)->MH)
+#define SPI_DL_REG(base)                         ((base)->DL)
+#define SPI_DH_REG(base)                         ((base)->DH)
+#define SPI_CI_REG(base)                         ((base)->CI)
+#define SPI_C3_REG(base)                         ((base)->C3)
+
+#else
 /* SPI - Register accessors */
 #define SPI_MCR_REG(base)                        ((base)->MCR)
 #define SPI_TCR_REG(base)                        ((base)->TCR)
@@ -16469,6 +16500,8 @@ typedef struct SPI_MemMap {
 #define SPI_RXFR2_REG(base)                      ((base)->RXFR2)
 #define SPI_RXFR3_REG(base)                      ((base)->RXFR3)
 
+#endif
+
 /**
  * @}
  */ /* end of group SPI_Register_Accessor_Macros */
@@ -16482,6 +16515,114 @@ typedef struct SPI_MemMap {
  * @addtogroup SPI_Register_Masks SPI Register Masks
  * @{
  */
+#if isp_shanwai
+
+/* S Bit Fields */
+#define SPI_S_RFIFOEF_MASK                       0x1u
+#define SPI_S_RFIFOEF_SHIFT                      0
+#define SPI_S_TXFULLF_MASK                       0x2u
+#define SPI_S_TXFULLF_SHIFT                      1
+#define SPI_S_TNEAREF_MASK                       0x4u
+#define SPI_S_TNEAREF_SHIFT                      2
+#define SPI_S_RNFULLF_MASK                       0x8u
+#define SPI_S_RNFULLF_SHIFT                      3
+#define SPI_S_MODF_MASK                          0x10u
+#define SPI_S_MODF_SHIFT                         4
+#define SPI_S_SPTEF_MASK                         0x20u
+#define SPI_S_SPTEF_SHIFT                        5
+#define SPI_S_SPMF_MASK                          0x40u
+#define SPI_S_SPMF_SHIFT                         6
+#define SPI_S_SPRF_MASK                          0x80u
+#define SPI_S_SPRF_SHIFT                         7
+/* BR Bit Fields */
+#define SPI_BR_SPR_MASK                          0xFu
+#define SPI_BR_SPR_SHIFT                         0
+#define SPI_BR_SPR(x)                            (((uint8_t)(((uint8_t)(x))<<SPI_BR_SPR_SHIFT))&SPI_BR_SPR_MASK)
+#define SPI_BR_SPPR_MASK                         0x70u
+#define SPI_BR_SPPR_SHIFT                        4
+#define SPI_BR_SPPR(x)                           (((uint8_t)(((uint8_t)(x))<<SPI_BR_SPPR_SHIFT))&SPI_BR_SPPR_MASK)
+/* C2 Bit Fields */
+#define SPI_C2_SPC0_MASK                         0x1u
+#define SPI_C2_SPC0_SHIFT                        0
+#define SPI_C2_SPISWAI_MASK                      0x2u
+#define SPI_C2_SPISWAI_SHIFT                     1
+#define SPI_C2_RXDMAE_MASK                       0x4u
+#define SPI_C2_RXDMAE_SHIFT                      2
+#define SPI_C2_BIDIROE_MASK                      0x8u
+#define SPI_C2_BIDIROE_SHIFT                     3
+#define SPI_C2_MODFEN_MASK                       0x10u
+#define SPI_C2_MODFEN_SHIFT                      4
+#define SPI_C2_TXDMAE_MASK                       0x20u
+#define SPI_C2_TXDMAE_SHIFT                      5
+#define SPI_C2_SPIMODE_MASK                      0x40u
+#define SPI_C2_SPIMODE_SHIFT                     6
+#define SPI_C2_SPMIE_MASK                        0x80u
+#define SPI_C2_SPMIE_SHIFT                       7
+/* C1 Bit Fields */
+#define SPI_C1_LSBFE_MASK                        0x1u
+#define SPI_C1_LSBFE_SHIFT                       0
+#define SPI_C1_SSOE_MASK                         0x2u
+#define SPI_C1_SSOE_SHIFT                        1
+#define SPI_C1_CPHA_MASK                         0x4u
+#define SPI_C1_CPHA_SHIFT                        2
+#define SPI_C1_CPOL_MASK                         0x8u
+#define SPI_C1_CPOL_SHIFT                        3
+#define SPI_C1_MSTR_MASK                         0x10u
+#define SPI_C1_MSTR_SHIFT                        4
+#define SPI_C1_SPTIE_MASK                        0x20u
+#define SPI_C1_SPTIE_SHIFT                       5
+#define SPI_C1_SPE_MASK                          0x40u
+#define SPI_C1_SPE_SHIFT                         6
+#define SPI_C1_SPIE_MASK                         0x80u
+#define SPI_C1_SPIE_SHIFT                        7
+/* ML Bit Fields */
+#define SPI_ML_Bits_MASK                         0xFFu
+#define SPI_ML_Bits_SHIFT                        0
+#define SPI_ML_Bits(x)                           (((uint8_t)(((uint8_t)(x))<<SPI_ML_Bits_SHIFT))&SPI_ML_Bits_MASK)
+/* MH Bit Fields */
+#define SPI_MH_Bits_MASK                         0xFFu
+#define SPI_MH_Bits_SHIFT                        0
+#define SPI_MH_Bits(x)                           (((uint8_t)(((uint8_t)(x))<<SPI_MH_Bits_SHIFT))&SPI_MH_Bits_MASK)
+/* DL Bit Fields */
+#define SPI_DL_Bits_MASK                         0xFFu
+#define SPI_DL_Bits_SHIFT                        0
+#define SPI_DL_Bits(x)                           (((uint8_t)(((uint8_t)(x))<<SPI_DL_Bits_SHIFT))&SPI_DL_Bits_MASK)
+/* DH Bit Fields */
+#define SPI_DH_Bits_MASK                         0xFFu
+#define SPI_DH_Bits_SHIFT                        0
+#define SPI_DH_Bits(x)                           (((uint8_t)(((uint8_t)(x))<<SPI_DH_Bits_SHIFT))&SPI_DH_Bits_MASK)
+/* CI Bit Fields */
+#define SPI_CI_SPRFCI_MASK                       0x1u
+#define SPI_CI_SPRFCI_SHIFT                      0
+#define SPI_CI_SPTEFCI_MASK                      0x2u
+#define SPI_CI_SPTEFCI_SHIFT                     1
+#define SPI_CI_RNFULLFCI_MASK                    0x4u
+#define SPI_CI_RNFULLFCI_SHIFT                   2
+#define SPI_CI_TNEAREFCI_MASK                    0x8u
+#define SPI_CI_TNEAREFCI_SHIFT                   3
+#define SPI_CI_RXFOF_MASK                        0x10u
+#define SPI_CI_RXFOF_SHIFT                       4
+#define SPI_CI_TXFOF_MASK                        0x20u
+#define SPI_CI_TXFOF_SHIFT                       5
+#define SPI_CI_RXFERR_MASK                       0x40u
+#define SPI_CI_RXFERR_SHIFT                      6
+#define SPI_CI_TXFERR_MASK                       0x80u
+#define SPI_CI_TXFERR_SHIFT                      7
+/* C3 Bit Fields */
+#define SPI_C3_FIFOMODE_MASK                     0x1u
+#define SPI_C3_FIFOMODE_SHIFT                    0
+#define SPI_C3_RNFULLIEN_MASK                    0x2u
+#define SPI_C3_RNFULLIEN_SHIFT                   1
+#define SPI_C3_TNEARIEN_MASK                     0x4u
+#define SPI_C3_TNEARIEN_SHIFT                    2
+#define SPI_C3_INTCLR_MASK                       0x8u
+#define SPI_C3_INTCLR_SHIFT                      3
+#define SPI_C3_RNFULLF_MARK_MASK                 0x10u
+#define SPI_C3_RNFULLF_MARK_SHIFT                4
+#define SPI_C3_TNEAREF_MARK_MASK                 0x20u
+#define SPI_C3_TNEAREF_MARK_SHIFT                5
+
+#else
 
 /* MCR Bit Fields */
 #define SPI_MCR_HALT_MASK                        0x1u
@@ -16680,10 +16821,22 @@ typedef struct SPI_MemMap {
 #define SPI_RXFR3_RXDATA_SHIFT                   0
 #define SPI_RXFR3_RXDATA(x)                      (((uint32_t)(((uint32_t)(x))<<SPI_RXFR3_RXDATA_SHIFT))&SPI_RXFR3_RXDATA_MASK)
 
+#endif
 /**
  * @}
  */ /* end of group SPI_Register_Masks */
 
+#if isp_shanwai
+/* SPI - Peripheral instance base addresses */
+/** Peripheral SPI0 base pointer */
+#define SPI0_BASE_PTR                            ((SPI_MemMapPtr)0x40076000u)
+/** Peripheral SPI1 base pointer */
+#define SPI1_BASE_PTR                            ((SPI_MemMapPtr)0x40077000u)
+/** Array initializer of SPI peripheral base pointers */
+#define SPI_BASE_PTRS                            { SPI0_BASE_PTR, SPI1_BASE_PTR }
+
+
+#else
 
 /* SPI - Peripheral instance base addresses */
 /** Peripheral SPI0 base pointer */
@@ -16693,6 +16846,7 @@ typedef struct SPI_MemMap {
 /** Peripheral SPI2 base pointer */
 #define SPI2_BASE_PTR                            ((SPI_MemMapPtr)0x400AC000u)
 
+#endif
 /* ----------------------------------------------------------------------------
    -- SPI - Register accessor macros
    ---------------------------------------------------------------------------- */
@@ -16702,6 +16856,31 @@ typedef struct SPI_MemMap {
  * @{
  */
 
+#if isp_shanwai
+
+/* SPI - Register instance definitions */
+/* SPI0 */
+#define SPI0_S                                   SPI_S_REG(SPI0_BASE_PTR)
+#define SPI0_BR                                  SPI_BR_REG(SPI0_BASE_PTR)
+#define SPI0_C2                                  SPI_C2_REG(SPI0_BASE_PTR)
+#define SPI0_C1                                  SPI_C1_REG(SPI0_BASE_PTR)
+#define SPI0_ML                                  SPI_ML_REG(SPI0_BASE_PTR)
+#define SPI0_MH                                  SPI_MH_REG(SPI0_BASE_PTR)
+#define SPI0_DL                                  SPI_DL_REG(SPI0_BASE_PTR)
+#define SPI0_DH                                  SPI_DH_REG(SPI0_BASE_PTR)
+/* SPI1 */
+#define SPI1_S                                   SPI_S_REG(SPI1_BASE_PTR)
+#define SPI1_BR                                  SPI_BR_REG(SPI1_BASE_PTR)
+#define SPI1_C2                                  SPI_C2_REG(SPI1_BASE_PTR)
+#define SPI1_C1                                  SPI_C1_REG(SPI1_BASE_PTR)
+#define SPI1_ML                                  SPI_ML_REG(SPI1_BASE_PTR)
+#define SPI1_MH                                  SPI_MH_REG(SPI1_BASE_PTR)
+#define SPI1_DL                                  SPI_DL_REG(SPI1_BASE_PTR)
+#define SPI1_DH                                  SPI_DH_REG(SPI1_BASE_PTR)
+#define SPI1_CI                                  SPI_CI_REG(SPI1_BASE_PTR)
+#define SPI1_C3                                  SPI_C3_REG(SPI1_BASE_PTR)
+
+#else
 
 /* SPI - Register instance definitions */
 /* SPI0 */
@@ -16770,6 +16949,7 @@ typedef struct SPI_MemMap {
 #define SPI1_CTAR_SLAVE(index2)                  SPI_CTAR_SLAVE_REG(SPI1_BASE_PTR,index2)
 #define SPI2_CTAR_SLAVE(index2)                  SPI_CTAR_SLAVE_REG(SPI2_BASE_PTR,index2)
 
+#endif
 /**
  * @}
  */ /* end of group SPI_Register_Accessor_Macros */

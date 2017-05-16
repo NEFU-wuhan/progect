@@ -2,7 +2,7 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\vcan_Kinetis.ewp</path>
+    <path>$WS_DIR$\Prj\IAR\vcan_Kinetis.ewp</path>
   </project>
   <batchBuild/>
 </workspace>

@@ -211,7 +211,7 @@ extern "C" {
     /*--------------------------------------------------------------*/
     /* FatFs module application interface                           */
 
-    FRESULT f_mount (uint8, FATFS *);                       /* Mount/Unmount a logical drive */
+    FRESULT f_mount (uint8, FATFS *);                       /* Mount/Unmount a logical drive 挂载/卸载一个逻辑驱动器*/
     FRESULT f_open (FIL *, const TCHAR *, uint8);           /* Open or create a file */
     FRESULT f_read (FIL *, void *, uint32, uint32 *);           /* Read data from a file */
     FRESULT f_lseek (FIL *, uint32);                        /* Move file pointer of a file object */
@@ -222,7 +222,7 @@ extern "C" {
     FRESULT f_write (FIL *, const void *, uint32, uint32 *);    /* Write data to a file */
     FRESULT f_getfree (const TCHAR *, uint32 *, FATFS **);  /* Get number of free clusters on the drive */
     FRESULT f_truncate (FIL *);                         /* Truncate file */
-    FRESULT f_sync (FIL *);                             /* Flush cached data of a writing file */
+    FRESULT f_sync (FIL *);                             /* Flush cached data of a writing file 刷新缓存数据的书面文件 */
     FRESULT f_unlink (const TCHAR *);                   /* Delete an existing file or directory */
     FRESULT f_mkdir (const TCHAR *);                        /* Create a new directory */
     FRESULT f_chmod (const TCHAR *, uint8, uint8);          /* Change attriburte of the file/dir */
@@ -233,11 +233,11 @@ extern "C" {
     FRESULT f_getcwd (TCHAR *, uint32);                 /* Get current directory */
     FRESULT f_forward (FIL *, uint32( *)(const uint8 *, uint32), uint32, uint32 *); /* Forward data to the stream */
     FRESULT f_mkfs (uint8, uint8, uint32);                  /* Create a file system on the drive */
-    FRESULT f_fdisk (uint8, const uint32[], void *);        /* Divide a physical drive into some partitions */
-    int f_putc (TCHAR, FIL *);                          /* Put a character to the file */
-    int f_puts (const TCHAR *, FIL *);                  /* Put a string to the file */
-    int f_printf (FIL *, const TCHAR *, ...);               /* Put a formatted string to the file */
-    TCHAR *f_gets (TCHAR *, int, FIL *);                    /* Get a string from the file */
+    FRESULT f_fdisk (uint8, const uint32[], void *);        /* Divide a physical drive into some partitions 将一个物理驱动分成一些分区*/
+    int f_putc (TCHAR, FIL *);                          /* Put a character to the file 把一个字符的文件*/
+    int f_puts (const TCHAR *, FIL *);                  /* Put a string to the file 把一个字符串到文件*/
+    int f_printf (FIL *, const TCHAR *, ...);               /* Put a formatted string to the file 把一个格式化的字符串到文件 */
+    TCHAR *f_gets (TCHAR *, int, FIL *);                    /* Get a string from the file 得到一个字符串从文件*/
 
 #define f_eof(fp) (((fp)->fptr == (fp)->fsize) ? 1 : 0)
 #define f_error(fp) (((fp)->flag & FA__ERROR) ? 1 : 0)

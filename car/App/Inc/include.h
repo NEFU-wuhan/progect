@@ -44,22 +44,19 @@
 
 #include  "VCAN_computer.h"     //多功能调试助手
 
-#include  "main.h"        //数据发送
+
+#include  "main.h"               //主函数
+#include  "O_data_send.h"        //数据发送
+#include  "O_dir.h"              //转向控制
+#include  "O_speed.h"            //速度控制
+#include  "O_init_system.h"      //系统初始化
+#include  "O_isr.h"              //中断函数
+#include  "O_picture_deal.h"     //图片处理
+#include  "O_display.h"          //液晶显示
+#include  "O_menu_control.h"     //其他
+#include  "O_SD_Card.h"          //SD卡
+#include  "O_measure_distance.h"            //超声波
 
 
-
-////////////////////////////////////个人编写////////////////////////////////////////
-
-#include  "dir_control_zq.h"  //速度控制
-#include  "init_system_zq.h"      //系统初始化
-#include  "isr_control_zq.h"              //中断函数
-#include  "picture_deal_zq.h"     //图片处理
-
-#include "send_control_zq.h"                                       //红树伟业图像传输
-#include "speedcontrol_zq.h"                               //速度控制
-#include "Menu_control.h"
-#include "display_zq.h"
-
-#include "measure_distance_zq.h"
 
 #endif  //__INCLUDE_H__

@@ -509,33 +509,36 @@
   <group>
     <name>App</name>
     <group>
-      <name>myself ZQ</name>
+      <name>ourself</name>
       <file>
-        <name>$PROJ_DIR$\..\..\App\dir_control_zq.c</name>
+        <name>$PROJ_DIR$\..\..\App\O_data_send.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\App\display_zq.c</name>
+        <name>$PROJ_DIR$\..\..\App\O_dir.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\App\init_system_zq.c</name>
+        <name>$PROJ_DIR$\..\..\App\O_display.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\App\isr_control_zq.c</name>
+        <name>$PROJ_DIR$\..\..\App\O_init_system.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\App\measure_distance_zq.c</name>
+        <name>$PROJ_DIR$\..\..\App\O_isr.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\App\Menu_control.c</name>
+        <name>$PROJ_DIR$\..\..\App\O_measure_distance.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\App\picture_deal_zq.c</name>
+        <name>$PROJ_DIR$\..\..\App\O_menu_control.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\App\send_control_zq.c</name>
+        <name>$PROJ_DIR$\..\..\App\O_picture_deal.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\App\speedcontrol_zq.c</name>
+        <name>$PROJ_DIR$\..\..\App\O_SD_Card.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\App\O_speed.c</name>
       </file>
     </group>
     <file>

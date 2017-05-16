@@ -338,7 +338,7 @@ DRESULT disk_write (uint8  drv, const uint8  *buff, uint32 sector, uint8  count)
     if (Stat & STA_NOINIT) return RES_NOTRDY;
     if (Stat & STA_PROTECT) return RES_WRPRT;
 
-    /* Check parameters */
+    /* Check parameters 检查参数 */
     if ((NULL == buff))
     {
         return RES_PARERR;      // 参数无效
@@ -346,7 +346,7 @@ DRESULT disk_write (uint8  drv, const uint8  *buff, uint32 sector, uint8  count)
 
     if (!SDHC_card.SDHC)
     {
-        sector *= SDCARD_BLOCK_SIZE;    /* Convert to byte address if needed */
+        sector *= SDCARD_BLOCK_SIZE;    /* Convert to byte address if needed 如果需要转换为字节地址 */
     }
 
     if (count == 1) /* Single block write */
@@ -404,7 +404,7 @@ DRESULT disk_write (uint8  drv, const uint8  *buff, uint32 sector, uint8  count)
             return RES_ERROR;
         }
 
-        /* Card status error check */
+        /* Card status error check 卡状态错误检查 */
         if (command.RESPONSE[0] & 0xFFD98008)
         {
             return RES_ERROR;

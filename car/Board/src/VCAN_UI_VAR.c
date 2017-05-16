@@ -26,13 +26,13 @@ ui_var_info_t  num_info[VAR_MAX] =
     //val,oldval,会在调用key_event_init的时候从其对应变量里赋值过来，所以这里的值可以随意写
     //需要设置minval,maxval,{x,y}
     //务必注意最小值不要大于最大值
-    {0, 0, 0, CAR_CTRL_MAX, {110,102}},      //变量 car_ctrl，
-    {0, 0, 0, 100, {110, 0}},                //变量 var1，
-    {0, 0, 0, 100, {110, 17}},               //变量 var2，
-    {0, 0, 0, 300, {110, 34}},               //变量 var3，
-    {0, 0, 0, 300, {110, 51}},               //变量 var4，
-    {0, 0, 0, 65540, {110, 68}},             //变量 var5，
-    {0, 0, 0, 65540, {110, 85}}              //变量 var6，
+    {0, 0, 0, CAR_CTRL_MAX, {90,102}},      //变量 car_ctrl，
+    {0, 0, 0, 100, {90, 0}},                //变量 var1，
+    {0, 0, 0, 100, {90, 17}},               //变量 var2，
+    {0, 0, 0, 300, {90, 34}},               //变量 var3，
+    {0, 0, 0, 300, {90, 51}},               //变量 var4，
+    {0, 0, 0, 65540, {90, 68}},             //变量 var5，
+    {0, 0, 0, 65540, {90, 85}}              //变量 var6，
 };
 
 uint8   new_tab = 0;        //当前选择的变量编号
@@ -164,7 +164,7 @@ void var_value(ui_var_event_e ctrl)
         break;
     }
 
-  //  var_display(new_tab);
+    var_display(new_tab);
 }
 
 //对变量进行选择
@@ -213,9 +213,9 @@ void var_select(ui_var_event_e  ctrl)
         return;
     }
 
-  //  var_display(old_tab);               //处理上一个变量
+    var_display(old_tab);               //处理上一个变量
 
-   // var_display(new_tab);              //处理当前变量：
+    var_display(new_tab);              //处理当前变量：
 
 }
 
@@ -231,7 +231,7 @@ void var_ok()
         var_syn(new_tab);          //同步新的值
     }
 
-   // var_display(new_tab);
+    var_display(new_tab);
 }
 
 //取消当前选择的值  OK
@@ -242,7 +242,7 @@ void val_cancel()
     //直接还原当前值
     VAR_VALUE(new_tab) = VAR_OLDVALUE(new_tab);
 
-   // var_display(new_tab);
+    var_display(new_tab);
 }
 
 
@@ -386,7 +386,7 @@ uint8 car_ctrl_syn(CAR_CTRL_MODE_e mode)
 
     ret =  var_syn(CAR_CTRL);
 
-   // var_display(CAR_CTRL);
+    var_display(CAR_CTRL);
 
     return ret;
 };
