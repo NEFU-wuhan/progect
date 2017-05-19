@@ -45,10 +45,12 @@ void key_event_init()
 
     key_init(KEY_MAX);  //初始化 全部 按键
 //    var_init();   //初始化临时变量
-
+#if nrf_debug
     //同步全部数据并显示
     var_syn(VAR_MAX);       //同步全部 ,必须先同步再显示全部，因为有可能同步失败。
     var_display(VAR_MAX);   //显示全部
+#endif
+
 }
 
 

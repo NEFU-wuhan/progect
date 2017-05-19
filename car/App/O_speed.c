@@ -32,15 +32,15 @@ short int speedwant_L;
 
 #if  ( CAR_MODEL==1 )
         float KP2=120;      //比例系数500
-        float Ki2=85;      //积分系数220
+        float Ki2=80;      //积分系数220
         float Kd2=10;
 #elif (CAR_MODEL==2 )
         float KP2=120;      //比例系数500
-        float Ki2=100;      //积分系数220
+        float Ki2=85;      //积分系数220
         float Kd2=10;
 #elif (CAR_MODEL==3 )
         float KP2=120;      //比例系数500
-        float Ki2=100;      //积分系数220
+        float Ki2=85;      //积分系数220
         float Kd2=10;
 #endif
 
@@ -77,15 +77,12 @@ int16 Car_Speed_average[8] ;
 //日期 2016-06-24
 //作者
 //--------------------------------------------------
-int shache_number[6]={0,15,20,25,30,40};
-int shache2_number;
 void init_motor()
 {
     ftm_pwm_init(MOTOR_FTM, MOTOR2_PWM,MOTOR_HZ,0);      //我们当初频率设置的10*1000
     ftm_pwm_init(MOTOR_FTM, MOTOR5_PWM,MOTOR_HZ,0);
     ftm_pwm_init(MOTOR_FTM, MOTOR3_PWM,MOTOR_HZ,0);
     ftm_pwm_init(MOTOR_FTM, MOTOR6_PWM,MOTOR_HZ,0);
-
 }
 
 //-------------------------------------------------

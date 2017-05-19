@@ -76,7 +76,7 @@ void img_extract(void *dst, void *src, uint32_t srclen)
           camera_boundary=25;
 //        for(j=25;j<153;j++)   //27-155
 #elif (CAR_MODEL==3 )
-          camera_boundary=17;
+          camera_boundary=23;
 //        for(j=17;j<145;j++)
 #endif
 

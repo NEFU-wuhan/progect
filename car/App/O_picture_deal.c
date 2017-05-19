@@ -52,7 +52,7 @@ line_info  line[line_num];            //ËäÈ»²É¼¯ÁË120ĞĞ,µ«Ö»ÓÃ80ĞĞ ½âÑ¹Ö®ºóµÄÍ¼Ï
  uint8 road_count_chao;
  uint8 xia_no=0;
 #if  ( CAR_MODEL==1 )
-        uint8 follow_huan=0;    //1 ÎªÑ°×óÏß£¬0ÎªÑ°ÓÒÏß
+        uint8 follow_huan=1;    //1 ÎªÑ°×óÏß£¬0ÎªÑ°ÓÒÏß
 #elif (CAR_MODEL==2 )
         uint8 follow_huan=1;    //1 ÎªÑ°×óÏß£¬0ÎªÑ°ÓÒÏß
 #elif (CAR_MODEL==3 )
@@ -187,7 +187,7 @@ void median_line_extract(uint8 *src)
     uint8 fiag_huan_l=0;
     uint8 budiu=0;
     uint8 huan_l_x=0,huan_r_x=0,huan_kuan=0;;
-    uint8 h_jiao=0,h_jiao_x=0,h_jiao6=0,h_jiao_x6=0;
+    uint8 h_jiao=0,h_jiao_x=0,h_jiao6=0,h_jiao_x6=0,h_jiao_cnt=0;
 
 	/*ÀûÓÃµÚÒ»ĞĞµÄÆ½¾ùÖµ×÷Îª¿ªÊ¼ÕÒÏßµÄÆğµã*/
     static int16 first_line_num,first_line_sum;
@@ -229,11 +229,11 @@ void median_line_extract(uint8 *src)
 //			hang_white_num=0;
 //		}
 
-        for(j=last_mid;j>0;j--)                    //É¨×óÏß   //Ã¿Ò»´Î¶¼´ÓÖĞ¼ä¿ªÊ¼
+        for(j=last_mid+10;j>0;j--)                    //É¨×óÏß   //Ã¿Ò»´Î¶¼´ÓÖĞ¼ä¿ªÊ¼
          {
             tmpsrc=*(pimg+j);
             if(tmpsrc==0)
-//            if( *(pimg+j)==0  &&  *(pimg+j+1)==255 )    //×ó±ß½ç£¨Ìø±ä£©//ÕâÁ½¸öÍ¨¹ıÕÒÌø±ä±ß½çµÄº¯ÊıÌæ»»ÎªÔ­À´µÄÕÒºÚµã·½Ê½
+//              if(0==*(pimg+j-1) && 255==*(pimg+j)) //°×ºÚÌø±ä
              {
                 line[i].left_line=j;
                 line[i].left_line_unrepiar=j;
@@ -261,7 +261,7 @@ void median_line_extract(uint8 *src)
          {
             tmpsrc=*(pimg+j);
             if(tmpsrc==0)
-//            if( *(pimg+j-1)==255 && *(pimg+j)==0)       //ÓÒ±ß½ç£¨Ìø±ä£©
+//            if(255==*(pimg+j) && 0==*(pimg+j+1))//°×ºÚÌø±ä
              {
                 line[i].right_line=j;
                 line[i].right_line_unrepiar=j;
@@ -590,58 +590,113 @@ void median_line_extract(uint8 *src)
      { //ÏÈÊ¶±ğ³ö»·µÀ³öµÄ¼â½Ç
        if( follow_huan )     // 1ÎªÑ°×óÏß,0ÎªÑ°ÓÒÏß
        {
-         if( i>30 && i<50
-            && line[i-1].line_case_mode== left_normal_right_lose &&(line[i-1].left_line_unrepiar > line[i-2].left_line_unrepiar  )
-              && line[i-2].line_case_mode== left_normal_right_lose &&(line[i-2].left_line_unrepiar > line[i-3].left_line_unrepiar  )
-                && line[i-3].line_case_mode== left_normal_right_lose &&(line[i-3].left_line_unrepiar > line[i-4].left_line_unrepiar  )
-                  )
+         if( i==10 && xia_no==0  && line[i].right_line_state== lose && line[i-8].right_line_state== lose
+            &&(line[i].left_line_unrepiar < line[i-2].left_line_unrepiar ||  line[i-2].left_line_unrepiar <8 )
+               &&(line[i-2].left_line_unrepiar < line[i-4].left_line_unrepiar ||  line[i-4].left_line_unrepiar <8 )
+              )
+           xia_no=1;
+         if( xia_no==1  && i>20 && i<40
+            &&  line[i].left_line_state== normal &&(line[i].left_line_unrepiar > line[i-2].left_line_unrepiar  )
+              &&  line[i-3].left_line_state== normal &&(line[i-2].left_line_unrepiar > line[i-4].left_line_unrepiar  )
+                )   // ÏÈÕÒ¼â½ÇÇ°°ë²¿·Ö
          {
            h_jiao=1;
            h_jiao_x=i;
          }
-         if(  h_jiao==1 && (i-h_jiao_x) < 20  && i<50
-            && line[i].line_case_mode== all_normal && (line[i].left_line_unrepiar < line[i-1].left_line_unrepiar  )
-              && line[i-1].line_case_mode== all_normal && (line[i-1].left_line_unrepiar < line[i-2].left_line_unrepiar  )
-                && line[i-2].line_case_mode== all_normal && (line[i-2].left_line_unrepiar < line[i-3].left_line_unrepiar  )
-                  )
+         if( xia_no==1 &&  h_jiao==1 && (i-h_jiao_x) < 20  && i<50
+            && line[i].left_line_state== normal &&(line[i].left_line_unrepiar < line[i-2].left_line_unrepiar  )
+              && line[i-3].left_line_state== normal &&(line[i-2].left_line_unrepiar < line[i-4].left_line_unrepiar  )
+                && line[i-6].left_line_state== normal &&(line[i-4].left_line_unrepiar < line[i-6].left_line_unrepiar  )
+                  )      //ÔÙÕÒ¼â½Çºó°ë²¿·Ö
          {
-           xia_no=4;
-            if(chao_one==1)      //Ö»ÓĞÇ°³µ²ÅÔÚÕâÍ£
-            {             // && sequence==1
-              speedwantD=0;
-              speedwantE=0;
-            }
+           xia_no=2;       // ¶¼ÕÒµ½ÔòÊ¶±ğÎª¼â½Ç £¬Ç°³µÍ£³µ
+           h_jiao_cnt=1;   //Ã¿´Î¶¼Ö»Ê¶±ğÒ»´Î¼â½Ç
+           if(chao_one==1  )      //&& sequence==1
+           {
+//             speedwantD=0;
+//             speedwantE=0;
+           }
+         }
+
+         if( xia_no==2  && h_jiao_cnt==0)
+         {
+           if(  xia_no==2 && i>5 && i<40
+              &&  line[i].left_line_state== normal &&(line[i].left_line_unrepiar > line[i-2].left_line_unrepiar  )
+                &&  line[i-3].left_line_state== normal &&(line[i-2].left_line_unrepiar > line[i-4].left_line_unrepiar  )
+                  )   // ÏÈÕÒ¼â½ÇÇ°°ë²¿·Ö
+           {
+             h_jiao=1;
+           }
+           if( h_jiao==1 && i<50
+              && line[i].left_line_state== normal &&(line[i].left_line_unrepiar < line[i-2].left_line_unrepiar  )
+                && line[i-3].left_line_state== normal &&(line[i-2].left_line_unrepiar < line[i-4].left_line_unrepiar  )
+                  )   // ÖØĞÂÕÒÒ»±é¼â½Ç£¬ÕÒ²»µ½ÔòÖ¤Ã÷ÒÑ¾­³ö¼â½Ç£¬³ö¼â½ÇÖ®ºóÈüµÀÕı³£Ôò³ö»·µÀ
+           {
+             h_jiao_cnt=1;
+           }
+           else
+           {
+             if(i>47)
+               xia_no=4;   //Ò»Ö±µ½×îºó¶¼ÕÒ²»µ½ÔòÕÒ²»µ½¼â½ÇÁË
+           }
          }
        }
-
        else
        {
-         if( i>30 && i<50
-            && line[i-1].line_case_mode== left_lose_right_normal &&(line[i-1].right_line_unrepiar < line[i-2].right_line_unrepiar  )
-              && line[i-2].line_case_mode== left_lose_right_normal &&(line[i-2].right_line_unrepiar < line[i-3].right_line_unrepiar  )
-                && line[i-3].line_case_mode== left_lose_right_normal &&(line[i-3].right_line_unrepiar < line[i-4].right_line_unrepiar  )
-                  )
+         if( i==10 && xia_no==0  && line[i].left_line_state== lose && line[i-8].left_line_state== lose
+            &&(line[i].right_line_unrepiar > line[i-2].right_line_unrepiar ||  line[i-2].right_line_unrepiar >120 )
+               &&(line[i-2].right_line_unrepiar > line[i-4].right_line_unrepiar ||  line[i-4].right_line_unrepiar >120 )
+              )
+           xia_no=1;
+         if( xia_no==1  && i>20 && i<40
+            &&  line[i].right_line_state== normal &&(line[i].right_line_unrepiar < line[i-2].right_line_unrepiar  )
+              &&  line[i-3].right_line_state== normal &&(line[i-2].right_line_unrepiar < line[i-4].right_line_unrepiar  )
+                )   // ÏÈÕÒ¼â½ÇÇ°°ë²¿·Ö
          {
            h_jiao=1;
            h_jiao_x=i;
          }
-         if( h_jiao==1 && (i-h_jiao_x) < 20  && i<50
-            && line[i].line_case_mode== all_normal && (line[i].right_line_unrepiar >= line[i-1].right_line_unrepiar  )
-              && line[i-1].line_case_mode== all_normal && (line[i-1].right_line_unrepiar >= line[i-2].right_line_unrepiar  )
-                && line[i-2].line_case_mode== all_normal && (line[i-2].right_line_unrepiar >= line[i-3].right_line_unrepiar  )
-                  )
+         if( xia_no==1 &&  h_jiao==1 && (i-h_jiao_x) < 20  && i<50
+            && line[i].right_line_state== normal &&(line[i].right_line_unrepiar > line[i-2].right_line_unrepiar  )
+              && line[i-3].right_line_state== normal &&(line[i-2].right_line_unrepiar > line[i-4].right_line_unrepiar  )
+                && line[i-6].right_line_state== normal &&(line[i-4].right_line_unrepiar > line[i-6].right_line_unrepiar  )
+                  )      //ÔÙÕÒ¼â½Çºó°ë²¿·Ö
          {
-           xia_no=4;
-            if(chao_one==1  )      //&& sequence==1
-            {
-              speedwantD=0;
-              speedwantE=0;
-            }
+           xia_no=2;       // ¶¼ÕÒµ½ÔòÊ¶±ğÎª¼â½Ç £¬Ç°³µÍ£³µ
+           h_jiao_cnt=1;   //Ã¿´Î¶¼Ö»Ê¶±ğÒ»´Î¼â½Ç
+           if(chao_one==1  )      //&& sequence==1
+           {
+//             speedwantD=0;
+//             speedwantE=0;
+           }
+         }
+
+         if( xia_no==2  && h_jiao_cnt==0)
+         {
+           if(  xia_no==2 && i>5 && i<40
+              &&  line[i].right_line_state== normal &&(line[i].right_line_unrepiar < line[i-2].right_line_unrepiar  )
+                &&  line[i-3].right_line_state== normal &&(line[i-2].right_line_unrepiar < line[i-4].right_line_unrepiar  )
+                  )   // ÏÈÕÒ¼â½ÇÇ°°ë²¿·Ö
+           {
+             h_jiao=1;
+           }
+           if( h_jiao==1 && i<50
+              && line[i].right_line_state== normal &&(line[i].right_line_unrepiar > line[i-2].right_line_unrepiar  )
+                && line[i-3].right_line_state== normal &&(line[i-2].right_line_unrepiar > line[i-4].right_line_unrepiar  )
+                  )   // ÖØĞÂÕÒÒ»±é¼â½Ç£¬ÕÒ²»µ½ÔòÖ¤Ã÷ÒÑ¾­³ö¼â½Ç£¬³ö¼â½ÇÖ®ºóÈüµÀÕı³£Ôò³ö»·µÀ
+           {
+             h_jiao_cnt=1;
+           }
+           else
+           {
+             if(i>47)
+               xia_no=4;   //Ò»Ö±µ½×îºó¶¼ÕÒ²»µ½ÔòÕÒ²»µ½¼â½ÇÁË
+           }
          }
        }
        //³ö»·µÀµÄ¼â½ÇÖ®ºóÈç¹ûÓĞÖ±µÀÔòÇå³ı»·µÀ±êÖ¾
        if( i==25 && fiag_huan==1  && xia_no==4)  //
-         for(j=10;j<25;j++)
+         for(j=7;j<25;j++)
          {
            if( line[j].line_case_mode==all_normal
               &&(line[j].left_line_unrepiar >= line[j-1].left_line_unrepiar  )
@@ -651,7 +706,7 @@ void median_line_extract(uint8 *src)
                   )
            {
              all_normal_count_huan++;
-             if(all_normal_count_huan>13)
+             if(all_normal_count_huan>15)
              {
                xia_no = 0;
                all_normal_count_huan=0;
@@ -718,7 +773,7 @@ void median_line_extract(uint8 *src)
                 line[i].right_line = line[i].left_line_unrepiar+distance[i];
              }
            }
-           else if(line[i].left_line_state==lose) //Èç¹ûÃ»ÓĞÕı³£µÄ×óÏß£¬Ò²ÕÒ²»µ½ÓÒÏß¾ÍÖ±½Ó¸ø¶¨ÖĞÏß
+           else if(line[i].right_line_state==lose) //Èç¹ûÃ»ÓĞÕı³£µÄ×óÏß£¬Ò²ÕÒ²»µ½ÓÒÏß¾ÍÖ±½Ó¸ø¶¨ÖĞÏß
            {
                 line[i].left_line=64;
                 line[i].right_line=128;
@@ -843,7 +898,7 @@ void median_line_extract(uint8 *src)
           }
         }
 
-        if(((line[i].right_line-line[i].left_line)<8)&&i>=30)      //¼ÆËã³öÓĞĞ§ĞĞ
+        if(((line[i].right_line-line[i].left_line)<15)&&i>=20)      //¼ÆËã³öÓĞĞ§ĞĞ
          {                                               //¼ÓÉÏÕâ¸öÅĞ¶Ï£¬²»È»ÆğÅÜÏßºÜÓĞÎÊÌâ Êı¾İ»á±»ÓĞĞ§ĞĞ½Ø¶Ï
  //           if(ABS(error)<=25&&i<=50)
  //           {
