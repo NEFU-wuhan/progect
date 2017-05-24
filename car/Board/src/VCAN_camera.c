@@ -70,10 +70,10 @@ void img_extract(void *dst, void *src, uint32_t srclen)
         }
 
 #if (CAR_MODEL==1  )
-        camera_boundary=10;
+        camera_boundary=11;
 //        for(j=13;j<141;j++)
 #elif (CAR_MODEL==2  )
-          camera_boundary=25;
+          camera_boundary=14;
 //        for(j=25;j<153;j++)   //27-155
 #elif (CAR_MODEL==3 )
           camera_boundary=23;

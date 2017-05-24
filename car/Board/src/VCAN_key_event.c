@@ -252,9 +252,8 @@ void deal_key_select()
                 DELAY_MS(500);
                 DJ_protect=0;
                 Motor_En=1;
-                speedwantD=100;
-                speedwantE=110;
-                Start_timing=System_time;    //开车的时候需要记录系统时间用于延时发车
+                speedwantD=speedwantD_set;
+                speedwantE=speedwantE_set;
                 flag_key_select=5;
                 flag_key_l_u_0=0;
                 var2=1;
@@ -490,13 +489,12 @@ void deal_key_left()
             case 2:
 
               {
-              //  Menu_data_num[0]-=5;  //  flag_chasu--;
+                speedwantD_set-=5;
               }
               break;
             case 3:
               {
-              //  Kp2-=10;
-              //  Kp22-=10;
+                speedwantE_set-=5;
               }
               break;
             case 4:
@@ -688,13 +686,12 @@ void deal_key_right()
               break;
             case 2:
               {
-              //   Menu_data_num[0]+=5;//  flag_chasu++;
+                speedwantD_set+=5;
               }
               break;
             case 3:
               {
-             //  Kp2+=10;
-             //  Kp22+=10;
+                speedwantE_set+=5;
               }
               break;
             case 4:

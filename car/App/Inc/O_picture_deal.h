@@ -7,6 +7,8 @@
 #define nHeight 70
 
 extern void    median_line_extract(uint8 *src);
+extern void Search_all_boundary( uint8 *src );
+
 extern uint8  used_length;
 extern float last_mid_line;
 extern uint8 single_in;
@@ -59,6 +61,7 @@ typedef struct
 } line_info;
 
 extern line_info  line[line_num];
-
+extern uint8  all_left_line[line_num][20];
+extern uint8  all_right_line[line_num][20];
 
 #endif //___GEMINI_PICTURE_DEAL_H

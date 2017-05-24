@@ -328,24 +328,51 @@ void lcd_show_3()         //主要用于查看电机及其相关参数
         //下面显示不可调整的参数
 
          Site_t site_m1 = {64,0};
-         LCD_str(site_m1,"sudu", BLUE,BLACK);
+         LCD_str(site_m1,"sud", BLUE,BLACK);
          Site_t site_m2 = {96,0};   //x = 10 ,y = 20
          LCD_num_BC(site_m2,speedwant,3, BLUE,BLACK);
-
+if(leftval>=0)
+{
          Site_t site_m3 = {64,16};
-         LCD_str(site_m3,"sudD", BLUE,BLACK);
+         LCD_str(site_m3,"Lsu", BLUE,BLACK);
+         Site_t site_m33 = {88,16};
+         LCD_str(site_m33," ", BLUE,BLACK);
          Site_t site_m4 = {96,16};   //x = 10 ,y = 20
-         LCD_num_BC(site_m4,speedwantD,3, BLUE,BLACK);
+         LCD_num_BC(site_m4,leftval,3, BLUE,BLACK);
+}
+else
+{
+         Site_t site_m3 = {64,16};
+         LCD_str(site_m3,"Lsu", BLUE,BLACK);
+         Site_t site_m33 = {88,16};
+         LCD_str(site_m33,"-", BLUE,BLACK);
+         Site_t site_m4 = {96,16};   //x = 10 ,y = 20
+         LCD_num_BC(site_m4,abs(leftval),3, BLUE,BLACK);
 
+}
+if(rightval>=0)
+{
          Site_t site_m5 = {64,16*2};
-         LCD_str(site_m5,"sudE", BLUE,BLACK);
+         LCD_str(site_m5,"Rsu", BLUE,BLACK);
+         Site_t site_m55 = {88,16*2};
+         LCD_str(site_m55," ", BLUE,BLACK);
          Site_t site_m6 = {96,16*2};   //x = 10 ,y = 20
-         LCD_num_BC(site_m6,speedwantE,3, BLUE,BLACK);
+         LCD_num_BC(site_m6,rightval,3, BLUE,BLACK);
+}
+else
+{
+         Site_t site_m5 = {64,16*2};
+         LCD_str(site_m5,"Rsu", BLUE,BLACK);
+         Site_t site_m55 = {88,16*2};
+         LCD_str(site_m55,"-", BLUE,BLACK);
+         Site_t site_m6 = {96,16*2};   //x = 10 ,y = 20
+         LCD_num_BC(site_m6,abs(rightval),3, BLUE,BLACK);
+}
 
          Site_t site_m7 = {64,16*3};
          LCD_str(site_m7,"juli", BLUE,BLACK);
          Site_t site_m8 = {96,16*3};   //x = 10 ,y = 20
-         LCD_num_BC(site_m8,Total_distance,5, BLUE,BLACK);
+         LCD_num_BC(site_m8,Total_distance/10,5, BLUE,BLACK);
 
          Site_t site_m9 = {64,16*4};
          LCD_str(site_m9,"time", BLUE,BLACK);
@@ -368,33 +395,33 @@ void lcd_show_3()         //主要用于查看电机及其相关参数
 
          Site_t site_m22 = {0,16};                       // 差速的斜率 p1
          LCD_str(site_m22,"p1", WHITE,color[1]);
-         Site_t site_m23 = {28,16};   //x = 10 ,y = 20
+         Site_t site_m23 = {32,16};   //x = 10 ,y = 20
 //         LCD_num_BC(site_m23,p1*10000,5, WHITE,color[1]);
 
          Site_t site_m24 = {0,16*2};
-         LCD_str(site_m24,"sudu", WHITE,color[2]);
+         LCD_str(site_m24,"suD", WHITE,color[2]);
          Site_t site_m25 = {32,16*2};   //x = 10 ,y = 20
-//         LCD_num_BC(site_m25,Menu_data_num[0],3, WHITE,color[2]);
+         LCD_num_BC(site_m25,speedwantD_set,3, WHITE,color[2]);
 
          Site_t site_m28 = {0,16*3};
-         LCD_str(site_m28,"Kp", WHITE,color[3]);
-         Site_t site_m29 = {28,16*3};   //x = 10 ,y = 20
-//         LCD_num_BC(site_m29,Kp2,4, WHITE,color[3]);
+         LCD_str(site_m28,"suE", WHITE,color[3]);
+         Site_t site_m29 = {32,16*3};   //x = 10 ,y = 20
+         LCD_num_BC(site_m29,speedwantE_set,4, WHITE,color[3]);
 
          Site_t site_m30 = {0,16*4};
-         LCD_str(site_m30,"Ki", WHITE,color[4]);
-         Site_t site_m31 = {28,16*4};   //x = 10 ,y = 20
-//         LCD_num_BC(site_m31,Ki2,4, WHITE,color[4]);
+         LCD_str(site_m30,"Kp", WHITE,color[4]);
+         Site_t site_m31 = {32,16*4};   //x = 10 ,y = 20
+//         LCD_num_BC(site_m31,Kp2,4, WHITE,color[4]);
 
          Site_t site_m32 = {0,16*5};
-         LCD_str(site_m32,"Kd", WHITE,color[5]);
-         Site_t site_m33 = {28,16*5};   //x = 10 ,y = 20
-//         LCD_num_BC(site_m33,Kd2,4, WHITE,color[5]);
+         LCD_str(site_m32,"Ki", WHITE,color[5]);
+         Site_t site_m33 = {32,16*5};   //x = 10 ,y = 20
+//         LCD_num_BC(site_m33,Ki2,4, WHITE,color[5]);
 
          Site_t site_m34 = {0,16*6};                          //差速的截距p2
-         LCD_str(site_m34,"posu", WHITE,color[6]);
+         LCD_str(site_m34,"Kd", WHITE,color[6]);
          Site_t site_m35 = {32,16*6};   //x = 10 ,y = 20
-//         LCD_num_BC(site_m35,Menu_data_num[1],3, WHITE,color[6]);
+//         LCD_num_BC(site_m35,Kd2,3, WHITE,color[6]);
 
          Site_t site_m26 = {0,16*7};
          LCD_FSTR_CH(site_m26,page_down ,WHITE, color[7]) ;     //下一页

@@ -3,8 +3,8 @@
 
 int speedwantB=0;
 int speedwantC=100;
-int speedwantD=100;
-int speedwantE=110;
+int speedwantD;
+int speedwantE;
 extern int32 se_du;
 
 long int speederror;
@@ -258,36 +258,36 @@ void speed_input()
 {
 
 
-   if((int)s_distance<100&&(int)s_distance>5)//距离小于3m,大于0.05m有效
-    {
-      speedwantB=speedwantD;    //speedwantC
-
-	if(s_distance<20)
-          speedwant =(int) (speedwantB * 0.5);
-        else if(s_distance<25)
-          speedwant =(int) (speedwantB * 0.6);
-        else if(s_distance<30)
-          speedwant =(int) (speedwantB * 0.7);
-        else if(s_distance<40)
-          speedwant =(int) (speedwantB * 0.8);
-        else if(s_distance<50)
-          speedwant =(int) (speedwantB *0.90);
-        else if(s_distance<55)
-          speedwant =(int) (speedwantB * 0.95);
-        else if(s_distance<65)                           //速度系数最接近1的时候，就是所控制的距离。
-          speedwant =(int) (speedwantB * 1.1);
-        else if(s_distance<70)
-          speedwant =(int) (speedwantB * 1.15);
-        else if(s_distance<95)
-          speedwant =(int) (speedwantB * 1.2);
-        else
-          speedwant =(int) (speedwantB * 1.22);
-
-        if(speedwant>(int)(speedwantB*1.10))//避免速度失控
-          speedwant=(int)(speedwantB*1.10);
-    }
-    else
-      speedwant =speedwantE;//(int)(speedwantB * 1.2) ;//超声波丢失的话保持设定速度100;//50;//(
+//   if((int)s_distance<100&&(int)s_distance>5)//距离小于3m,大于0.05m有效
+//    {
+//      speedwantB=speedwantD;    //speedwantC
+      speedwant=speedwantD;
+//	if(s_distance<20)
+//          speedwant =(int) (speedwantB * 0.5);
+//        else if(s_distance<25)
+//          speedwant =(int) (speedwantB * 0.6);
+//        else if(s_distance<30)
+//          speedwant =(int) (speedwantB * 0.7);
+//        else if(s_distance<40)
+//          speedwant =(int) (speedwantB * 0.8);
+//        else if(s_distance<50)
+//          speedwant =(int) (speedwantB *0.90);
+//        else if(s_distance<55)
+//          speedwant =(int) (speedwantB * 0.95);
+//        else if(s_distance<65)                           //速度系数最接近1的时候，就是所控制的距离。
+//          speedwant =(int) (speedwantB * 1.1);
+//        else if(s_distance<70)
+//          speedwant =(int) (speedwantB * 1.15);
+//        else if(s_distance<95)
+//          speedwant =(int) (speedwantB * 1.2);
+//        else
+//          speedwant =(int) (speedwantB * 1.22);
+//
+//        if(speedwant>(int)(speedwantB*1.10))//避免速度失控
+//          speedwant=(int)(speedwantB*1.10);
+//    }
+//    else
+//      speedwant =speedwantE;//(int)(speedwantB * 1.2) ;//超声波丢失的话保持设定速度100;//50;//(
 //       printf("%d/n",speedwant);      speedwantC
 //       printf("%d\n",s_distance);
 //   if(fiag_huan) speedwant=0;

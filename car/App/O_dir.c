@@ -11,10 +11,10 @@
         #define MIN_dir_duty       6880  //6880
 #elif (CAR_MODEL==2 )
         int Mid_duty=7450;
-        float Kp1=14;  //15
-        float Kp2=0.26;        //0.36
+        float Kp1=12;  //15
+        float Kp2=0.36;        //0.36
         float Kd=4.00;        //4.36
-        #define MID_dir_duty       7450  //7780
+        #define MID_dir_duty       7500  //7780
         #define MAX_dir_duty       8500  //8740
         #define MIN_dir_duty       6500  //6880
 #elif (CAR_MODEL==3 )

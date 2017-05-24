@@ -149,12 +149,11 @@ void  main(void)
             if(var2==1)     //表示发车
             {
               DJ_protect=0;
-              Start_timing=System_time;    //开车的时候需要记录系统时间用于延时发车
               flag_key_select=5;
               flag_key_l_u_0=0;
               Motor_En=1;
-              speedwantD=100;
-              speedwantE=110;
+              speedwantD=speedwantD_set;
+              speedwantE=speedwantE_set;
             }
             else          //表示停车
             {
@@ -170,8 +169,8 @@ void  main(void)
           if( var3==0 )
           {
             if( chao_one==1 && fiag_huan==0)  chao_one=0;
-            speedwantD=100;
-            speedwantE=110;
+            speedwantD=speedwantD_set;
+            speedwantE=speedwantE_set;
           }
         }
 
@@ -246,11 +245,11 @@ void  main(void)
         LCD_show();
 
 #if  ( CAR_MODEL==1 )
-        measure_distance();
+//        measure_distance();
 #elif (CAR_MODEL==2 )
         measure_distance();
 #elif (CAR_MODEL==3 )
-        measure_distance();
+//        measure_distance();
 #endif
     }
 }
