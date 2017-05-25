@@ -245,11 +245,11 @@ void  main(void)
         LCD_show();
 
 #if  ( CAR_MODEL==1 )
-//        measure_distance();
+        measure_distance();
 #elif (CAR_MODEL==2 )
         measure_distance();
 #elif (CAR_MODEL==3 )
-//        measure_distance();
+        measure_distance();
 #endif
     }
 }
