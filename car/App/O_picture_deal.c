@@ -203,7 +203,7 @@ void median_line_extract(uint8 *src)
     uint8 fiag_huan_r=0;
     uint8 fiag_huan_l=0;
     uint8 budiu=0;
-    uint8 huan_l_x=0,huan_r_x=0,huan_kuan=0,huan_kuan1=0,huan_loca=0;
+    uint8 huan_l_x=0,huan_r_x=0,huan_kuan=0,huan_kuan1_l=0,huan_kuan1_r=0,huan_loca=0;
     uint8 h_jiao=0,h_jiao_x=0,h_jiao6=0,h_jiao_x6=0,h_jiao_cnt=0;
     float slope=0;   //计算斜率
     int16 last_dis_x=0,dis_x=0,dis_x_cnt=0,last_zuo_x=0,last_you_x=128;
@@ -351,24 +351,24 @@ void median_line_extract(uint8 *src)
 
 
 ///////////////////////////   判断环道     /////////////
-        uint8 zuo=0,you=0,zuo_x=0,you_x=0,zuo1=0,you1=0,you2_x=0,you2=0;
+        uint8 zuo=0,you=0,zuo_x=0,you_x=0,zuo1=0,you1=0,you2_x=0,you2=0,zuo2=0,zuo2_x=0;
 
 // 识别环道
         if( fiag_huan==0 )
         {
           //////////////////// 环道前直道的程序 ////////////////////
-          if( i<11 && budiu==0)  //进入环道之前是直道
+          if( i<10 && budiu==0)  //进入环道之前是直道
           {
             if( line[i].road_wide-distance2[i]<=10  && line[i].right_line_unrepiar > 85 && line[i].left_line_unrepiar < 45 )
             {
               all_normal_count_huan++;
-              if(all_normal_count_huan>9)
+              if(all_normal_count_huan>8)
               {
                 budiu=1;
               }
             }
           }
-          if( budiu && i>6 && i<55 )   //
+          if( budiu && i>6 && i<52 )   //
           {
             //////////////////////判断赛道变宽的程序
             if( i<35 && line[i].road_wide > line[i-2].road_wide
@@ -387,14 +387,14 @@ void median_line_extract(uint8 *src)
             {
               for(j=7;j<40;j++)
               {
-                if(line[j].left_line_unrepiar>3
+                if(j<23 && line[j].left_line_unrepiar>3
                    &&  line[j].left_line_unrepiar<line[j-2].left_line_unrepiar
                      && (line[j-4].left_line_unrepiar>=line[j-6].left_line_unrepiar))
                 {
                   fiag_huan_l=1;
                   huan_l_x=j;
                 }
-                if(line[j].right_line_unrepiar<125
+                if(j<23 && line[j].right_line_unrepiar<125
                    &&  line[j].right_line_unrepiar>line[j-2].right_line_unrepiar
                      && (line[j-4].right_line_unrepiar<=line[j-6].right_line_unrepiar) )
                 {
@@ -406,68 +406,106 @@ void median_line_extract(uint8 *src)
                   huan_kuan=2;  //左右两边变宽的尖角离的很近
                   break;
                 }
-                /////////////环道前只能看到一个尖角的情况
-                if( j>10 && huan_kuan1==0 && line[j].right_line_unrepiar<125
+                /////////////环道前只能看到一个右尖角的情况
+                if( j>10 && huan_kuan1_r==0 && huan_kuan1_l==0 && line[j].right_line_unrepiar<125
                    &&  line[j].right_line_unrepiar>line[j-2].right_line_unrepiar  && line[j].line_case_mode==left_lose_right_normal
                      &&  line[j-2].right_line_unrepiar>line[j-4].right_line_unrepiar && line[j-4].line_case_mode==left_lose_right_normal
                        &&  line[j-4].right_line_unrepiar>line[j-6].right_line_unrepiar && line[j-6].line_case_mode==left_lose_right_normal
                          && (line[j-8].right_line_unrepiar<=line[j-10].right_line_unrepiar) )
                 {
-                  huan_kuan1=1;
+                  huan_kuan1_r=1;
                   huan_loca=j-6;
                 }
-
+                /////////////环道前只能看到一个左尖角的情况
+                if( j>10 && huan_kuan1_l==0 && huan_kuan1_r==0 && line[j].left_line_unrepiar<125
+                   &&  line[j].left_line_unrepiar>line[j-2].left_line_unrepiar  && line[j].line_case_mode==left_normal_right_lose
+                     &&  line[j-2].left_line_unrepiar>line[j-4].left_line_unrepiar && line[j-4].line_case_mode==left_normal_right_lose
+                       &&  line[j-4].left_line_unrepiar>line[j-6].left_line_unrepiar && line[j-6].line_case_mode==left_normal_right_lose
+                         && (line[j-8].left_line_unrepiar<=line[j-10].left_line_unrepiar) )
+                {
+                  huan_kuan1_l=1;
+                  huan_loca=j-6;
+                }
 
               }
             }
             uint8 n=0,zuo_mini=0,you_mini=0;
             //////////////////////  只有一个尖角时环道中心圆环的识别
-            if(huan_kuan==1 && huan_kuan1==1 )
+            if(huan_kuan==1 && (huan_kuan1_r==1 || huan_kuan1_l==1) )
             {
-
               for(j=huan_loca+5;j<55;j++)
               {
-                you2=0;
-                you2_x=0;
-                pimg1=src+(line_num-1-j)*128;
 
-//                tmpsrc=*(pimg1+line[huan_loca].left_line_unrepiar + (j- huan_loca));
-//                if( tmpsrc ==0 )  // src+(line_num-1-i)*128;
-//                {
-//                  zuo1=1;
-//                  zuo_x=line[huan_l_x].left_line_unrepiar + (j- huan_l_x) ;
-//                }
+                if( huan_kuan1_r==1 )
+                {
 
-                tmpsrc=*(pimg1+line[huan_loca].right_line_unrepiar - (j- huan_loca));
-                if( tmpsrc ==0  )  // src+(line_num-1-i)*128;    && (line[huan_loca].left_line_unrepiar - (j- huan_loca))>10
-                {
-                  you2=1;
-                  you2_x=line[huan_loca].right_line_unrepiar - (j- huan_loca) ;
-                }
-                if( ( you2==1 && you2_x>10)  )
-                {
-                  for(n=you2_x-5;n<127;n++)
+                  you2=0;
+                  you2_x=0;
+                  pimg1=src+(line_num-1-j)*128;
+
+                  tmpsrc=*(pimg1+line[huan_loca].right_line_unrepiar - (j- huan_loca));
+                  if( tmpsrc ==0  )  // src+(line_num-1-i)*128;    && (line[huan_loca].left_line_unrepiar - (j- huan_loca))>10
                   {
-                    if(0==*(pimg1+n-1) && 255==*(pimg1+n)  && zuo_mini==0) //黑白跳变
+                    you2=1;
+                    you2_x=line[huan_loca].right_line_unrepiar - (j- huan_loca) ;
+                  }
+                  if( ( you2==1 && you2_x>10)  )
+                  {
+                    for(n=you2_x-5;n<127;n++)
                     {
+                      if(0==*(pimg1+n-1) && 255==*(pimg1+n)  && zuo_mini==0) //黑白跳变
+                      {
                         zuo_mini=n;
-                    }
-                    if(255==*(pimg1+n) && 0==*(pimg1+n+1) && you_mini==0)//白黑跳变
-                    {
+                      }
+                      if(255==*(pimg1+n) && 0==*(pimg1+n+1) && you_mini==0)//白黑跳变
+                      {
                         you_mini=n;
+                      }
                     }
                   }
                 }
+                else
+                {
+                  {
 
+                    zuo2=0;
+                    zuo2_x=0;
+                    pimg1=src+(line_num-1-j)*128;
+
+                    tmpsrc=*(pimg1+line[huan_loca].left_line_unrepiar + (j- huan_loca));
+                    if( tmpsrc ==0 )  // src+(line_num-1-i)*128;
+                    {
+                      zuo2=1;
+                      zuo2_x=line[huan_l_x].left_line_unrepiar + (j- huan_l_x) ;
+                    }
+
+                    if( ( zuo2==1 && zuo2_x<118)  )
+                    {
+                      for(n=zuo2_x+5;n>0;n--)
+                      {
+                        if(0==*(pimg1+n-1) && 255==*(pimg1+n)  && zuo_mini==0) //黑白跳变
+                        {
+                          zuo_mini=n;
+                        }
+                        if(255==*(pimg1+n) && 0==*(pimg1+n+1) && you_mini==0)//白黑跳变
+                        {
+                          you_mini=n;
+                        }
+                      }
+                    }
+                  }                }
                 if( ( zuo_mini!=0 && you_mini!=0
                      && you_mini>zuo_mini
-//                       && you_mini-zuo_mini<20
+                       //                       && you_mini-zuo_mini<20
                        )   //zuo2==1 ||
-//                   && *(pimg1+(uint8)(zuo_x+ you_x)/2 )==0
-                     )
+                   //                   && *(pimg1+(uint8)(zuo_x+ you_x)/2 )==0
+                   )
                 {
                   fiag_huan=1;
                   hehe++;
+
+//                  speedwantD=0;
+
                   if(hehe>200) hehe=200;
                   //            tongbu[3]=1;
                   if(var3==0  //加这个条件是为了让前车识别超车标志，开始超车（且不让后车再进入）
@@ -478,7 +516,6 @@ void median_line_extract(uint8 *src)
                     if(cut_1>200) cut_1=200;
                     chao_one=1;
 
-                    speedwantD=0;
 
                     var3=1;         //并且环道切换标志同步（表示正在切换，切换完成后清零）
                     updata_var(VAR3);
@@ -494,6 +531,7 @@ void median_line_extract(uint8 *src)
                   break;
                 }
               }
+
 
             }
             //////////////////////  环道中心圆环的识别
@@ -522,6 +560,8 @@ void median_line_extract(uint8 *src)
                 {
                   fiag_huan=1;
                   hehe++;
+//                                      speedwantD=0;
+
                   if(hehe>200) hehe=200;
                   //            tongbu[3]=1;
                   if(var3==0  //加这个条件是为了让前车识别超车标志，开始超车（且不让后车再进入）

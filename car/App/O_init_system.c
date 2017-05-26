@@ -17,7 +17,7 @@ void NRF_INIT(void);
 void init_sys(void)
  {
     /************************ 电机  舵机   初始化  ***********************/
-    ftm_pwm_init(S3010_FTM, S3010_CH,S3010_HZ,7880);   // 舵机
+    ftm_pwm_init(S3010_FTM, S3010_CH,S3010_HZ,Mid_duty);   // 舵机
     ftm_pwm_init(FTM0, FTM_CH4,10000, 0);    //左电机正转
     ftm_pwm_init(FTM0, FTM_CH5,10000, 0);    //左电机反转
     ftm_pwm_init(FTM0, FTM_CH6,10000, 0);    //右电机反转

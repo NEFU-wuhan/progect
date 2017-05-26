@@ -18,6 +18,10 @@ extern float mid_line;
 extern int32 SE_duty;                  //舵机的PWM占空比
 extern int Mid_duty ;
 
+extern float Kp1;  //16
+extern float Kp2;
+extern float Kd;
+
 extern void DJ_PID(void);
 
 

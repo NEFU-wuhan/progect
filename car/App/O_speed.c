@@ -1,8 +1,8 @@
 #include "common.h"
 #include "include.h"
 
-int speedwantB=0;
-int speedwantC=100;
+int speedwantB;
+int speedwantC;
 int speedwantD;
 int speedwantE;
 extern int32 se_du;
@@ -35,9 +35,9 @@ short int speedwant_L;
         float Ki2=80;      //积分系数220
         float Kd2=10;
 #elif (CAR_MODEL==2 )
-        float KP2=120;      //比例系数500
-        float Ki2=85;      //积分系数220
-        float Kd2=10;
+        float KP2=114;      //比例系数500
+        float Ki2=84;      //积分系数220
+        float Kd2=20;
 #elif (CAR_MODEL==3 )
         float KP2=120;      //比例系数500
         float Ki2=85;      //积分系数220
@@ -101,7 +101,7 @@ void speedcontrol5()
 /////////////////////   速度设置  /////////////////////////////////
       speed_input();
 ///////////////////// 差速计算   /////////////n ////////////////////
-      nextError=SE_duty-Mid_duty;        //1552     1518
+      nextError=Mid_duty-SE_duty;        //1552     1518
   //   y=(p1_3*ABS(nextError)*ABS(nextError)*ABS(nextError))+(p2_3*ABS(nextError)*ABS(nextError))+p3_3*ABS(nextError)+p4_3;                                  //二次的差速
       y=(p1*ABS(nextError))+p2;       //一次的差速比例
       unsigned char zhi=100;
@@ -136,17 +136,6 @@ void speedcontrol5()
    if(Motor_En==1)      //电机使能
    {
 
-
-          if(speedwant_pre==160&&speedwant==Menu_data_num[0])
-          {
-           kvff_param=5;
-           kvff_param2=5;
-          }
-          else
-          {
-            kvff_param=1;
-           kvff_param2=1;
-          }
          //右电机
 
           error_L[2]=error_L[1];
@@ -155,8 +144,8 @@ void speedcontrol5()
           error_R[2]=error_R[1];
           error_R[1]=error_R[0];
           error_R[0]=speedwant_R-rightval;     //这个比是左轮
-          speedaboutangle += KP2 *(error_L[0]-error_L[1])+Ki2*error_L[0]+  Kd2 * (error_L[0]-2*error_L[1]+error_L[2]);
-          speedaboutangle2 += KP2 *(error_R[0]-error_R[1])+Ki2*error_R[0]+  Kd2 * (error_R[0]-2*error_R[1]+error_R[2]);
+          speedaboutangle2 += KP2 *(error_L[0]-error_L[1])+Ki2*error_L[0]+  Kd2 * (error_L[0]-2*error_L[1]+error_L[2]);
+          speedaboutangle  += KP2 *(error_R[0]-error_R[1])+Ki2*error_R[0]+  Kd2 * (error_R[0]-2*error_R[1]+error_R[2]);
 
 
 
@@ -213,8 +202,8 @@ void Spd_Dtc_Get()
     Spees_pre_pre=Speed_pre;
     Speed_pre=Car_Speed;
 
-    rightval =-ftm_quad_get(FTM2);      //获取脉冲
-    leftval  =ftm_quad_get(FTM1);
+    leftval   =-ftm_quad_get(FTM2);      //获取脉冲
+    rightval  = ftm_quad_get(FTM1);
 
     dj_protect(rightval,leftval);        //电机保护函数
 

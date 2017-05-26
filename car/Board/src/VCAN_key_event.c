@@ -20,6 +20,7 @@
 #include "O_menu_control.h"
 #include "main.h"
 #include "O_speed.h"
+#include "O_dir.h"
 
 //#include "NRF24L0.h"
 //#include "NRF24L0_MSG.h"
@@ -430,17 +431,17 @@ void deal_key_left()
               break;
             case 1:
               {
-                //   DJ_Kp_d-=5;
+                   Kp1-=0.5;
               }
               break;
             case 2:
               {
-                 //  DJ_Kd--;
+                   Kp2-=0.05;
               }
               break;
             case 3:
               {
-                 //  angle_center--;
+                   Kd-=0.5;
               }
               break;
             case 4:
@@ -482,8 +483,8 @@ void deal_key_left()
               break;
             case 1:
               {
-                 //  Speed_set_tem-=5;
-            //   p1-=0.0001;
+                 //  KP2-=5;
+               p1-=0.0001;
               }
               break;
             case 2:
@@ -499,19 +500,17 @@ void deal_key_left()
               break;
             case 4:
               {
-             //   Ki2-=10;
-             //   Ki22-=10;
+                KP2-=5;
               }
               break;
             case 5:
               {
-             //   Kd2-=1;
-             //   Kd22-=1;
+                Ki2-=1;
               }
               break;
             case 6:
               {
-             //  Menu_data_num[1]-=5;
+               Kd2-=1;
               }
               break;
             case 7:     //下一页
@@ -542,7 +541,6 @@ void deal_key_left()
               }
               break;
             case 2:
-
               {
               //  game_plan--;
               }
@@ -628,17 +626,17 @@ void deal_key_right()
               break;
             case 1:
               {
-                //  DJ_Kp_d+=5;
+                  Kp1+=0.5;
               }
               break;
             case 2:
               {
-                //  DJ_Kd++;
+                  Kp2+=0.05;
               }
               break;
             case 3:
               {
-                //  angle_center++;
+                  Kd+=0.5;
               }
               break;
             case 4:
@@ -680,7 +678,7 @@ void deal_key_right()
               break;
             case 1:
               {
-              //  p1+=0.0001;
+                p1+=0.0001;
                   //  Speed_set_tem+=5;
               }
               break;
@@ -696,19 +694,18 @@ void deal_key_right()
               break;
             case 4:
               {
-             //  Ki2+=10;
-             //  Ki22+=10;
+               KP2+=5;
+
               }
               break;
             case 5:
               {
-             //  Kd2+=1;
-             //  Kd22+=1;
+               Ki2+=1;
               }
               break;
             case 6:
               {
-             //  Menu_data_num[1]+=5;
+                Kd2+=1;
               }
               break;
             case 7:     //下一页
