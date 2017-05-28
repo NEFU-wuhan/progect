@@ -7,7 +7,7 @@
 #define nHeight 70
 
 extern void    median_line_extract(uint8 *src);
-extern void Search_all_boundary( uint8 *src );
+//extern
 
 extern uint8  used_length;
 extern float last_mid_line;
@@ -22,6 +22,7 @@ extern uint8  Y_point[70];
 extern float last_mid_line;
 
 extern uint8 fiag_huan_r,fiag_huan_l,fiag_huan;
+extern uint8 follow_huan;    //1 为寻左线，0为寻右线
 
 extern uint8 hehe,hehe1;
 extern uint8 xia_no;

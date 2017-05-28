@@ -9,7 +9,7 @@
 #define FLAGWAIT    0xFFFFF
 
 
-extern unsigned int s_distance;
+extern int s_distance;
 extern int s_distance_l;
 extern int s_distance_ll;
 extern int s_distance_lll;

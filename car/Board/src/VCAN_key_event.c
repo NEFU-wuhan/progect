@@ -253,8 +253,17 @@ void deal_key_select()
                 DELAY_MS(500);
                 DJ_protect=0;
                 Motor_En=1;
-                speedwantD=speedwantD_set;
-                speedwantE=speedwantE_set;
+                if(front_car == 1)
+                {
+                  speedwantD=speedwantD_set;
+                  speedwantE=speedwantE_set;
+                }
+                else
+                {
+                  speedwantD=speedwantD_set;
+                  speedwantE=speedwantE_set + 7;
+                }
+
                 flag_key_select=5;
                 flag_key_l_u_0=0;
                 var2=1;

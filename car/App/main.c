@@ -17,9 +17,9 @@
 #include "include.h"
 
 long int speedwant=0;
-int16 speedwantD_set=100;
-int16 speedwantE_set=110;
-
+int16 speedwantD_set=80;
+int16 speedwantE_set=80;
+uint8 CAR_MODEL;    //1-号车， 2-2号车， 3-3号车
 uint8  var1, var2;
 uint16 var3, var4;
 uint32 var5, var6;
@@ -55,7 +55,6 @@ void  main(void)
     //---------------------------
     while(1)
     {
-
         /************************ 图像采集和显示  ***********************/
         camera_get_img();                           //摄像头获取图像
 
@@ -66,6 +65,7 @@ void  main(void)
         median_line_extract(img);	            //摄像头图像处理
 
         quan_dir_duty_new();				    //算出每一帧图像的中线权重
+
 //        hswy_sendimg(img);         //红书伟业上位机图像传输
 
 
@@ -244,13 +244,8 @@ void  main(void)
 
         LCD_show();
 
-#if  ( CAR_MODEL==1 )
         measure_distance();
-#elif (CAR_MODEL==2 )
-        measure_distance();
-#elif (CAR_MODEL==3 )
-        measure_distance();
-#endif
+
     }
 }
 

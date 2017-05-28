@@ -7,36 +7,42 @@
 void PIT2_IRQHandler()        //主要中断循环
 {
     static uint8  part=0;
-
+    zhenshu_count++;
+    if(zhenshu_count==1000)    //1秒钟显示一次，即为当前帧数
+    {
+      display_zs=camera_zhenshu;
+      camera_zhenshu=0;
+      zhenshu_count=0;
+    }
     part++;
+
     //循环计数控制，（只用于CCD采集和舵机速度控制），总中断还是一秒进入一次
     switch(part)
     {
-      case 1:
-           DJ_PID();                //先进行舵机控制
-        break;
-      case 2:
-   //        GetMotoPulse();
-    //     Spd_Dtc_Get();
-        break;
-      case 3:
-         speedcontrol5();
-        break;
-      case 4:
-        break;
-      case 5:
+    case 1:
+      DJ_PID();                //先进行舵机控制
+      break;
+    case 2:
+      speedcontrol5();
+      break;
+    case 3:
+      break;
+    case 4:
 
-        part=0;
-        break;
+      break;
+    case 5:
+      bat_voltage_measure() ;      //电压测量
 
-      default:
-        part=0;
-        break;
+      part=0;
+      break;
+
+    default:
+      part=0;
+      break;
     }
      Time_Commen();   //记录系统时间
 //   if(Beep_En)                                                //蜂鸣器使能及蜂鸣器程序
 //      Beep();
-//   bat_voltage_measure() ;      //电压测量
 
    PIT_Flag_Clear(PIT2);
 }
@@ -54,7 +60,7 @@ void PORTA_IRQHandler()
     flag = PORTA_ISFR;
     PORTA_ISFR  = ~0;                                   //清中断标志位
 
-    n = 29;                                             //场中断
+    n = 29; //场中断
     if(flag & (1 << n))                                 //PTA29触发中断
     {
         camera_vsync();
@@ -106,3 +112,10 @@ void PORTE_IRQHandler()
         nrf_handler();
     }
 }
+
+///////////******超声波外部中断服务函数*******//////////
+void portb_handler()
+{
+  PORT_FUNC(A,19,measure_distance);        //A  24
+}
+

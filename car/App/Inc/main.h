@@ -4,7 +4,7 @@
 extern uint8 img[160*120];
 
 #define nrf_debug 0    //0-关闭无线传输， 1-开启无线传输
-#define CAR_MODEL 1    //1-号车， 2-2号车， 3-3号车
+extern uint8 CAR_MODEL;    //1-号车， 2-2号车， 3-3号车
 
 extern uint8  var1, var2;
 extern uint16 var3, var4;

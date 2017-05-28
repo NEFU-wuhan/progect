@@ -21,6 +21,9 @@ extern int Mid_duty ;
 extern float Kp1;  //16
 extern float Kp2;
 extern float Kd;
+extern int MID_dir_duty;
+extern int MAX_dir_duty;
+extern int MIN_dir_duty;
 
 extern void DJ_PID(void);
 

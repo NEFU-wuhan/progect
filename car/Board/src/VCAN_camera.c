@@ -51,6 +51,11 @@ void img_extract(void *dst, void *src, uint32_t srclen)
   uint8 all_img[160];
   uint8 *p_all;
   int i,j;
+
+  if(CAR_MODEL==1  ) camera_boundary=11;
+  else if(CAR_MODEL==2  ) camera_boundary=14;
+  else if(CAR_MODEL==3 ) camera_boundary=23;
+  else camera_boundary=23;
   for(i=0;i<120;i++)
   {
     if(line_distance[i]==1)             //前80个是1后二十个是0
@@ -68,17 +73,6 @@ void img_extract(void *dst, void *src, uint32_t srclen)
             *p_all++ = color[ (tmpsrc >> 1 ) & 0x01 ];
             *p_all++ = color[ (tmpsrc >> 0 ) & 0x01 ];
         }
-
-#if (CAR_MODEL==1  )
-        camera_boundary=11;
-//        for(j=13;j<141;j++)
-#elif (CAR_MODEL==2  )
-          camera_boundary=14;
-//        for(j=25;j<153;j++)   //27-155
-#elif (CAR_MODEL==3 )
-          camera_boundary=23;
-//        for(j=17;j<145;j++)
-#endif
 
         for(j=camera_boundary;j<camera_boundary+128;j++)
         {

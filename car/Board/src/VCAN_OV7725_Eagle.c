@@ -19,7 +19,7 @@
 #include "MK60_port.h"
 #include "MK60_dma.h"
 #include "VCAN_camera.h"
-
+extern uint32 camera_zhenshu;
 
 
 #define OV7725_EAGLE_Delay_ms(time)  DELAY_MS(time)
@@ -106,6 +106,7 @@ void ov7725_eagle_vsync(void)
 void ov7725_eagle_dma()
 {
     ov7725_eagle_img_flag = IMG_FINISH ;
+    camera_zhenshu++;
     DMA_IRQ_CLEAN(CAMERA_DMA_CH);           //清除通道传输中断标志位
 }
 

@@ -25,8 +25,10 @@ short int nextError;
 int32 speedaboutangle;
 int32 speedaboutangle2;
 int32 speedaboutangle_zong;
-
-
+uint8 boma[4];
+uint32 zhenshu_count;
+uint32 camera_zhenshu;
+uint8 display_zs;
 //电机差速系数
 float p1=0.0013;//原值0.8043     0.004076    0.006576
 float p2=0.9252;//原值1.0220
@@ -64,14 +66,15 @@ int16 bat_voltage_measure()
   static uint16 bat_cnt=0;
   float bat_temp=0;
   bat_cnt++;
+
   static uint8 baojing_cut;
 
-  if(bat_cnt>200)//一秒检测一次
+  if(bat_cnt>400)//一秒检测一次
   {
     bat_cnt=0;
     for(uint8 syc=10;syc>0;syc--)
     {
-      bat_temp+=adc_once(ADC0_SE8,ADC_12bit);
+      bat_temp+=adc_once(ADC0_DM1,ADC_12bit);
     }
 
     dianya=(0.1*bat_temp*14.3 *100/4096);        //14.3   39.78            19.15
@@ -153,3 +156,4 @@ void Beep()
       time=0;
    }
 }
+

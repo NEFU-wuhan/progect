@@ -1,31 +1,13 @@
 #include "common.h"
 #include "include.h"
 
-#if  ( CAR_MODEL==1 )
-        int Mid_duty=7400;
-        float Kp1=13;  //16
-        float Kp2=0.36;
-        float Kd=4.36;
-        #define MID_dir_duty       7400  //7780
-        #define MAX_dir_duty       8400  //8740
-        #define MIN_dir_duty       6400  //6880
-#elif (CAR_MODEL==2 )
-        int Mid_duty=7500;
-        float Kp1=13;  //15
-        float Kp2=0.41;        //0.36
-        float Kd=4.40;        //4.36
-        #define MID_dir_duty       7500  //7780
-        #define MAX_dir_duty       8500  //8740
-        #define MIN_dir_duty       6500  //6880
-#elif (CAR_MODEL==3 )
-        int Mid_duty=7500;
-        float Kp1=14;  //16
-        float Kp2=0.36;
-        float Kd=4.55;
-        #define MID_dir_duty       7500
-        #define MAX_dir_duty       8500
-        #define MIN_dir_duty       6550
-#endif
+        int Mid_duty;
+        float Kp1;
+        float Kp2;
+        float Kd;
+        int MID_dir_duty;
+        int MAX_dir_duty;
+        int MIN_dir_duty;
 
 
 extern int16 speed_current;
@@ -228,43 +210,43 @@ void quan_dir_duty_new()
 //	}
        uint8 set_midline=64;
        static uint8 z=0,h=0;
-//       if(Total_distance<200   //发车前两米内，一个车靠左一个车靠右
-//          && var4==0)    // 只有在超车未完成的时候在进入
-//       {
-//          used_length=30;
-//          if(sequence==1)   //前车靠左
-//          {
-//            set_midline=77;
-//            if(Total_distance>30 && Total_distance<35 && z==0 && chao_one2==0)    //前车在指定位置停车
-//            {
-//              z++;
-//              chao_one2=1;
-//              speedwantD=0;
-//              speedwantE=0;
-//            }
-//          }
-//          else              //后车靠右
-//          {
-//            set_midline=51;
-//          }
-//       }
-//       if(sequence==1)   //停下的车检测到超声波之后恢复正常
-//       {
-//         if(road_count_chao>18 && chao_one2==1 && h==0)    //前车停车等待超车完成时若超声波能检测到数据，证明超车完成
-//         {
-//           chao_one2=0;
-//           h++;
-//
-//           var4=1;         //并且环道切换标志同步（表示正在切换，切换完成后清零）
-//           updata_var(VAR4);
-//           tongbu[4]=10;
-//
-//           speedwantD=speedwantD_set;
-//           speedwantE=speedwantE_set;
-//           set_midline=64;
-//         }
-//       }
-//       else              //超过去的车接收到NRF信号之后恢复正常
+       if(Total_distance<170   //发车前两米内，一个车靠左一个车靠右
+          && var4==0)    // 只有在超车未完成的时候在进入
+       {
+          used_length=30;
+          if(sequence==1)   //前车靠左
+          {
+            set_midline=85;  //77
+            if(Total_distance>30 && Total_distance<35 && z==0 && chao_one2==0)    //前车在指定位置停车
+            {
+              z++;
+              chao_one2=1;
+              speedwantD=0;
+              speedwantE=0;
+            }
+          }
+          else              //后车靠右
+          {
+            set_midline=51;
+          }
+       }
+       if(sequence==1)   //停下的车检测到超声波之后恢复正常
+       {
+         if(road_count_chao>18 && chao_one2==1 && h==0)    //前车停车等待超车完成时若超声波能检测到数据，证明超车完成
+         {
+           chao_one2=0;
+           h++;
+
+           var4=1;         //并且环道切换标志同步（表示正在切换，切换完成后清零）
+           updata_var(VAR4);
+           tongbu[4]=10;
+
+           speedwantD=speedwantD_set;
+           speedwantE=speedwantE_set;
+           set_midline=64;
+         }
+       }
+       else              //超过去的车接收到NRF信号之后恢复正常
        {
          if(var4==1)
          {

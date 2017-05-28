@@ -40,7 +40,11 @@ extern long int rightval;
 extern long int leftval;
 extern int16 dianya;
 extern int16 flag_didianya;
+extern uint8 boma[4];
 
+extern uint32 zhenshu_count;
+extern uint32 camera_zhenshu;
+extern uint8 display_zs;
 ////////////////////////////  º¯Êý¶¨Òå  ////////////////////////
 extern int16 bat_voltage_measure();
 extern void Time_Commen();

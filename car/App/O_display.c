@@ -154,12 +154,12 @@ void lcd_show_0()      //显示菜单
     site.y = 103;
     LCD_FSTR_CH(site,start_go,WHITE, color[4]) ;      //发车   finish_line
 
- //   if(flag_didianya)
-//    {
-//      site.x = 73;
-//      site.y = 3;
-//      LCD_FSTR_CH(site,didianya ,BLACK, YELLOW) ;      //显示低电压提示
-//    }
+    if(flag_didianya)
+    {
+      site.x = 3;
+      site.y = 3;
+      LCD_FSTR_CH(site,didianya ,BLACK, YELLOW) ;      //显示低电压提示
+    }
 
 //    if(Final_line_flag)
 //    {
@@ -180,10 +180,6 @@ void lcd_show_0()      //显示菜单
 
 void lcd_show_1()      //主要用于采集图像显示赛道信息
 {
-         Site_t   camera_site={0,0};                           //显示图像左上角位置
-         Size_t   camera_imgsize={128,80};
-         LCD_Img_Binary_My(camera_site,camera_imgsize,img);  //显示图像
-         LCD_line(line,RED,GREEN);                           //画出边线和中线
 
          Site_t site = {0,73};   //x = 10 ,y = 20
          Size_t size = {128,4};  // W = 50 ,H = 60
@@ -211,13 +207,16 @@ void lcd_show_1()      //主要用于采集图像显示赛道信息
          Site_t site_m7 = {32*3 +8 ,80+16};
          LCD_str(site_m7,"zs", WHITE,color[4]);
          Site_t site_m8 = {32*3 +8 ,80+16*2};
-         LCD_num(site_m8,fiag_huan,WHITE,color[4]);                   //显示帧数
-      //   LCD_num_BC(site_m8,frame,3,WHITE, color[4]);          //显示有用行
+//         LCD_num(site_m8,fiag_huan,WHITE,color[4]);                   //显示帧数
+         LCD_num_BC(site_m8,display_zs,3,WHITE, color[4]);          //显示有用行
 
          Site_t site_m18 = {64,80};
          LCD_FSTR_CH(site_m18,page_down ,WHITE, color[1]) ;     //下一页
 
-
+         Site_t   camera_site={0,0};                           //显示图像左上角位置
+         Size_t   camera_imgsize={128,80};
+         LCD_Img_Binary_My(camera_site,camera_imgsize,img);  //显示图像
+         LCD_line(line,RED,GREEN);                           //画出边线和中线
 
 }
 
@@ -239,16 +238,16 @@ void lcd_show_2()           //主要用于查看舵机及其相关参数
          LCD_num_BC(site_m2,System_time,3, BLUE,BLACK);
 
          Site_t site_m3 = {64,16};
-         LCD_str(site_m3,"2_", BLUE,BLACK);
+         LCD_str(site_m3,"diya", BLUE,BLACK);
 
          Site_t site_m4 = {96,16};   //x = 10 ,y = 20
-         LCD_num_BC(site_m4,2,4, BLUE,BLACK);
+         LCD_num_BC(site_m4,dianya,4, BLUE,BLACK);
 
          Site_t site_m5 = {64,32};
-         LCD_str(site_m5,"3_", BLUE,BLACK);
+         LCD_str(site_m5,"huan", BLUE,BLACK);
 
          Site_t site_m6 = {93,32};   //x = 10 ,y = 20
-         LCD_num_BC(site_m6,3,3, BLUE,BLACK);
+         LCD_num_BC(site_m6,fiag_huan,3, BLUE,BLACK);
 
          Site_t site_m7 = {64,48};
          LCD_str(site_m7,"4_", BLUE,BLACK);
