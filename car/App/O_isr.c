@@ -13,6 +13,7 @@ void PIT2_IRQHandler()        //主要中断循环
       display_zs=camera_zhenshu;
       camera_zhenshu=0;
       zhenshu_count=0;
+      if(display_zs<display_zs_min ) display_zs_min=display_zs;
     }
     part++;
 
@@ -31,7 +32,7 @@ void PIT2_IRQHandler()        //主要中断循环
 
       break;
     case 5:
-      bat_voltage_measure() ;      //电压测量
+//      bat_voltage_measure() ;      //电压测量
 
       part=0;
       break;
@@ -92,6 +93,17 @@ void DMA0_IRQHandler()
  */
 void PIT0_IRQHandler()
 {
+ /**/
+   if(stop == 1)
+  {
+    stop_count++;
+    if(stop_count >= 800)
+    {
+      stop_count=800;
+    }
+  }
+  /**/
+
     key_IRQHandler();
 
     PIT_Flag_Clear(PIT0);
@@ -116,6 +128,6 @@ void PORTE_IRQHandler()
 ///////////******超声波外部中断服务函数*******//////////
 void portb_handler()
 {
-  PORT_FUNC(A,19,measure_distance);        //A  24
+  PORT_FUNC(B,22,measure_distance);        //A  24
 }
 

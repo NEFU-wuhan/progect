@@ -24,6 +24,7 @@ extern float Kd;
 extern int MID_dir_duty;
 extern int MAX_dir_duty;
 extern int MIN_dir_duty;
+extern float index_A,index_B;    //index_A为斜率  index_B为截距   斜率一般更为常用
 
 extern void DJ_PID(void);
 

@@ -7,8 +7,10 @@ char color[10]={BLACK,BLACK,BLACK,BLACK,BLACK,BLACK,BLACK,BLACK,BLACK,BLACK};
 int8 key_flag_clear=1;
 uint8 fache=0;
 
+extern uint8 set_midline;
 uint8 shua_one=0;
 const uint16    *bmp[3];
+uint8 bujiezhi = 0;
 /*******************************************************************************
  * Function Name: bmp_init();
  * Description  : bmp图片初始化
@@ -99,12 +101,18 @@ void LCD_show()
             case 5:
               {
 
-                if(fache<1)
+                if(shua_one==0)
                 {
+                  shua_one=1;
                   key_lcd_clear();
                   lcd_show_5();     //发车（停止刷屏）
-                  fache=1;
                 }
+              }
+              break;
+            case 6:
+              {
+                key_lcd_clear();
+                lcd_show_6();     //显示其他
               }
               break;
         }
@@ -125,34 +133,40 @@ void lcd_show_0()      //显示菜单
     LCD_FSTR_CH(site,menu ,WHITE, BLACK) ;    //菜单           //vcan_str       menu
 
     Site_t site_m1 = {5,23};
-    LCD_str(site_m1,"1 ", WHITE,color[0]);           //
+    LCD_str(site_m1,"1 ", WHITE,color[1]);           //
     site.x = 13;
     site.y = 23;
-    LCD_FSTR_CH(site,side ,WHITE, color[0]) ;    //赛道信息           //datuxiang       menu
+    LCD_FSTR_CH(site,side ,WHITE, color[1]) ;    //赛道信息           //datuxiang       menu
 
     Site_t site_m2 = {5,43};
-    LCD_str(site_m2,"2 ", WHITE,color[1]);           //
+    LCD_str(site_m2,"2 ", WHITE,color[2]);           //
     site.x = 13;
     site.y = 43;
-    LCD_FSTR_CH(site,sever ,WHITE, color[1]) ;       //舵机参数
+    LCD_FSTR_CH(site,sever ,WHITE, color[2]) ;       //舵机参数
 
     Site_t site_m3 = {5,63};
-    LCD_str(site_m3,"3 ", WHITE,color[2]);           //
+    LCD_str(site_m3,"3 ", WHITE,color[3]);           //
     site.x = 13;
     site.y = 63;
-    LCD_FSTR_CH(site,motor_display ,WHITE, color[2]) ;      //电机参数
+    LCD_FSTR_CH(site,motor_display ,WHITE, color[3]) ;      //电机参数
 
     Site_t site_m4= {5,83};
-    LCD_str(site_m4,"4 ", WHITE,color[3]);           //
+    LCD_str(site_m4,"4 ", WHITE,color[4]);           //
     site.x = 13;
     site.y = 83;
-    LCD_FSTR_CH(site,other_canshu ,WHITE, color[3]) ;      //其他参数
+    LCD_FSTR_CH(site,other_canshu ,WHITE, color[4]) ;      //其他参数
 
     Site_t site_m5 = {5,103};
-    LCD_str(site_m5,"5 ", WHITE,color[4]);           //
+    LCD_str(site_m5,"5 ", WHITE,color[5]);           //
     site.x = 13;
     site.y = 103;
-    LCD_FSTR_CH(site,start_go,WHITE, color[4]) ;      //发车   finish_line
+    LCD_FSTR_CH(site,start_go,WHITE, color[5]) ;      //发车   finish_line
+
+    Site_t site_m6 = {65,103};
+    LCD_str(site_m6,"6 ", WHITE,color[6]);           //
+    site.x = 73;
+    site.y = 103;
+    LCD_FSTR_CH(site,shezhi,WHITE, color[6]) ;      //设置
 
     if(flag_didianya)
     {
@@ -161,12 +175,12 @@ void lcd_show_0()      //显示菜单
       LCD_FSTR_CH(site,didianya ,BLACK, YELLOW) ;      //显示低电压提示
     }
 
-//    if(Final_line_flag)
-//    {
-//      site.x = 78;
-//      site.y = 103;
-//      LCD_FSTR_CH(site,finish_line ,BLACK, YELLOW) ;      //显示终点提示
-//    }
+    if(yiting)
+    {
+      site.x = 78;
+      site.y = 103;
+      LCD_FSTR_CH(site,finish_line ,BLACK, YELLOW) ;      //显示终点提示
+    }
 
 }
 
@@ -180,6 +194,10 @@ void lcd_show_0()      //显示菜单
 
 void lcd_show_1()      //主要用于采集图像显示赛道信息
 {
+         Site_t   camera_site={0,0};                           //显示图像左上角位置
+         Size_t   camera_imgsize={128,70};
+         LCD_Img_Binary_My(camera_site,camera_imgsize,img);  //显示图像
+         LCD_line(line,RED,GREEN);                           //画出边线和中线
 
          Site_t site = {0,73};   //x = 10 ,y = 20
          Size_t size = {128,4};  // W = 50 ,H = 60
@@ -202,21 +220,16 @@ void lcd_show_1()      //主要用于采集图像显示赛道信息
          Site_t site_m5 = {32*2,80+16};
          LCD_str(site_m5,"duoj", WHITE,color[3]);
          Site_t site_m6 = {32*2,80+16*2};
-         LCD_num(site_m6,SE_duty,WHITE, color[3]);                   //显示舵机打角
+         LCD_num(site_m6,Ramp_flag,WHITE, color[3]);                   //显示舵机打角     SE_duty  Ramp_flag  L_wrz_flag
 
          Site_t site_m7 = {32*3 +8 ,80+16};
          LCD_str(site_m7,"zs", WHITE,color[4]);
          Site_t site_m8 = {32*3 +8 ,80+16*2};
 //         LCD_num(site_m8,fiag_huan,WHITE,color[4]);                   //显示帧数
-         LCD_num_BC(site_m8,display_zs,3,WHITE, color[4]);          //显示有用行
+         LCD_num_BC(site_m8,cut_2,3,WHITE, color[4]);          //显示有用行  display_zs
 
          Site_t site_m18 = {64,80};
          LCD_FSTR_CH(site_m18,page_down ,WHITE, color[1]) ;     //下一页
-
-         Site_t   camera_site={0,0};                           //显示图像左上角位置
-         Size_t   camera_imgsize={128,80};
-         LCD_Img_Binary_My(camera_site,camera_imgsize,img);  //显示图像
-         LCD_line(line,RED,GREEN);                           //画出边线和中线
 
 }
 
@@ -244,34 +257,34 @@ void lcd_show_2()           //主要用于查看舵机及其相关参数
          LCD_num_BC(site_m4,dianya,4, BLUE,BLACK);
 
          Site_t site_m5 = {64,32};
-         LCD_str(site_m5,"huan", BLUE,BLACK);
+         LCD_str(site_m5,"hud", BLUE,BLACK);
 
          Site_t site_m6 = {93,32};   //x = 10 ,y = 20
          LCD_num_BC(site_m6,fiag_huan,3, BLUE,BLACK);
 
          Site_t site_m7 = {64,48};
-         LCD_str(site_m7,"4_", BLUE,BLACK);
+         LCD_str(site_m7,"zs_x", BLUE,BLACK);
 
          Site_t site_m8 = {93,48};   //x = 10 ,y = 20
-         LCD_num_BC(site_m8,4,3, BLUE,BLACK);
+         LCD_num_BC(site_m8,display_zs_min,3, BLUE,BLACK);
 
          Site_t site_m9 = {64,64};
-         LCD_str(site_m9,"5_", BLUE,BLACK);
+         LCD_str(site_m9,"Lzhd", BLUE,BLACK);
 
          Site_t site_m10 = {96,64};   //x = 10 ,y = 20
-         LCD_num_BC(site_m10,5,3, BLUE,BLACK);
+         LCD_num_BC(site_m10,L_wrz_flag,3, BLUE,BLACK);
 
          Site_t site_m11 = {64,80};
-         LCD_str(site_m11,"6_", BLUE,BLACK);
+         LCD_str(site_m11,"Rzhd", BLUE,BLACK);
 
          Site_t site_m12 = {96,80};   //x = 10 ,y = 20
-         LCD_num_BC(site_m12,6,3, BLUE,BLACK);
+         LCD_num_BC(site_m12,R_wrz_flag,3, BLUE,BLACK);
 
          Site_t site_m13 = {64,96};
-         LCD_str(site_m13,"7_", BLUE,BLACK);
+         LCD_str(site_m13,"pod", BLUE,BLACK);
 
          Site_t site_m14 = {96,96};   //x = 10 ,y = 20
-         LCD_num_BC(site_m14,7,3, BLUE,BLACK);
+         LCD_num_BC(site_m14,Ramp_flag,3, BLUE,BLACK);
       //下面显示可以调整的参数
 
          Site_t site_m21 = {0,0};
@@ -293,9 +306,9 @@ void lcd_show_2()           //主要用于查看舵机及其相关参数
          LCD_num_BC(site_m29,Kd*100,3, WHITE,color[3]);
 
          Site_t site_m30 = {0,64};
-         LCD_str(site_m30,"4_", WHITE,color[4]);
+         LCD_str(site_m30,"MID", WHITE,color[4]);
          Site_t site_m31 = {32,64};   //x = 10 ,y = 20
-         LCD_num_BC(site_m31,4,3, WHITE,color[4]);
+         LCD_num_BC(site_m31,MID_dir_duty,3, WHITE,color[4]);
 
          Site_t site_m32 = {0,80};
          LCD_str(site_m32,"5_", WHITE,color[5]);
@@ -430,7 +443,7 @@ else
          Site_t site_m28 = {0,16*3};
          LCD_str(site_m28,"suE", WHITE,color[3]);
          Site_t site_m29 = {32,16*3};   //x = 10 ,y = 20
-         LCD_num_BC(site_m29,speedwantE_set,4, WHITE,color[3]);
+         LCD_num_BC(site_m29,wrz_distance,4, WHITE,color[3]);        // wrz_distance     speedwantE_set
 
          Site_t site_m30 = {0,16*4};
          LCD_str(site_m30,"Kp", WHITE,color[4]);
@@ -463,8 +476,7 @@ else
  * Output Param : 无
  * Description  :
  * Author Data  : 2015/5/27  by momo
- ******************************************************************************/
-
+******************************************************************************/
 void lcd_show_4()           //主要用于查看其他信息（待完善）
 {
         //下面显示不可调整的参数
@@ -484,13 +496,13 @@ void lcd_show_4()           //主要用于查看其他信息（待完善）
          Site_t site_m5 = {64,32};
          LCD_str(site_m5,"xn", BLUE,BLACK);
 
-         Site_t site_m6 = {93,32};   //x = 10 ,y = 20
+         Site_t site_m6 = {96,32};   //x = 10 ,y = 20
          LCD_num_BC(site_m6,xia_no,3, BLUE,BLACK);
 
          Site_t site_m7 = {64,48};
          LCD_str(site_m7,"var3", BLUE,BLACK);
 
-         Site_t site_m8 = {93,48};   //x = 10 ,y = 20
+         Site_t site_m8 = {96,48};   //x = 10 ,y = 20
          LCD_num_BC(site_m8,var3,3, BLUE,BLACK);
 
          Site_t site_m9 = {64,64};
@@ -506,19 +518,19 @@ void lcd_show_4()           //主要用于查看其他信息（待完善）
          LCD_num_BC(site_m12,cut_1,3, BLUE,BLACK);
 
          Site_t site_m13 = {64,96};
-         LCD_str(site_m13,"cu2", BLUE,BLACK);
+         LCD_str(site_m13,"var4", BLUE,BLACK);
 
          Site_t site_m14 = {96,96};   //x = 10 ,y = 20
-         LCD_num_BC(site_m14,cut_2,3, BLUE,BLACK);
+         LCD_num_BC(site_m14,var4,3, BLUE,BLACK);
       //下面显示可以调整的参数
 
          Site_t site_m21 = {0,0};
          LCD_FSTR_CH(site_m21,page_up ,WHITE, color[0]) ;     //上一页
 
          Site_t site_m22 = {0,16};
-         LCD_str(site_m22,"turn", WHITE,color[1]);
+         LCD_str(site_m22,"TU_W", WHITE,color[1]);
          Site_t site_m23 = {32,16};   //x = 10 ,y = 20
-         LCD_num_BC(site_m23,weizhi_turn,3, WHITE,color[1]);
+         LCD_num_BC(site_m23,camera_boundary,3, WHITE,color[1]);
 
          Site_t site_m24 = {0,32};
          LCD_str(site_m24,"D", WHITE,color[2]);
@@ -561,11 +573,107 @@ void lcd_show_4()           //主要用于查看其他信息（待完善）
 
 void lcd_show_5()           //主要用于显示发车图像
 {
+         Site_t site_m28 = {64,96};
+         LCD_FSTR_CH(site_m28,tingche ,WHITE,  color[1]) ;     //停车
          Site_t site_m27 = {64,112};
-         LCD_FSTR_CH(site_m27,break_menu ,WHITE, BLUE) ;     //返回主菜单
+         LCD_FSTR_CH(site_m27,break_menu ,WHITE,  color[2]) ;     //返回主菜单
 }
 
- /*******************************************************************************
+/*******************************************************************************
+ * Function Name: void lcd_show_6()
+ * Input Param  : 无
+ * Output Param : 无
+ * Description  :
+ * Author Data  : 2015/5/27  by momo
+******************************************************************************/
+void lcd_show_6()           //主要用于查看其他信息（待完善）
+{
+        //下面显示不可调整的参数
+
+         Site_t site_m1 = {64,0};
+         LCD_str(site_m1,"CAR", BLUE,BLACK);
+
+         Site_t site_m2 = {96,0};   //x = 10 ,y = 20
+         LCD_num_BC(site_m2,CAR_MODEL,3, BLUE,BLACK);
+
+         Site_t site_m3 = {64,16};
+         LCD_str(site_m3,"cars", BLUE,BLACK);
+
+         Site_t site_m4 = {96,16};   //x = 10 ,y = 20
+         LCD_num_BC(site_m4,sequence,4, BLUE,BLACK);
+
+         Site_t site_m5 = {64,32};
+         LCD_str(site_m5,"xn", BLUE,BLACK);
+
+         Site_t site_m6 = {93,32};   //x = 10 ,y = 20
+         LCD_num_BC(site_m6,xia_no,3, BLUE,BLACK);
+
+         Site_t site_m7 = {64,48};
+         LCD_str(site_m7,"var3", BLUE,BLACK);
+
+         Site_t site_m8 = {93,48};   //x = 10 ,y = 20
+         LCD_num_BC(site_m8,var3,3, BLUE,BLACK);
+
+         Site_t site_m9 = {64,64};
+         LCD_str(site_m9,"var1", BLUE,BLACK);
+
+         Site_t site_m10 = {96,64};   //x = 10 ,y = 20
+         LCD_num_BC(site_m10,var1,3, BLUE,BLACK);
+
+         Site_t site_m11 = {64,80};
+         LCD_str(site_m11,"cu1", BLUE,BLACK);
+
+         Site_t site_m12 = {96,80};   //x = 10 ,y = 20
+         LCD_num_BC(site_m12,cut_1,3, BLUE,BLACK);
+
+         Site_t site_m13 = {64,96};
+         LCD_str(site_m13,"7_", BLUE,BLACK);
+
+         Site_t site_m14 = {96,96};   //x = 10 ,y = 20
+         LCD_num_BC(site_m14,7,3, BLUE,BLACK);
+      //下面显示可以调整的参数
+
+         Site_t site_m21 = {0,0};
+         LCD_FSTR_CH(site_m21,page_up ,WHITE, color[0]) ;     //上一页
+
+         Site_t site_m22 = {0,16};
+         LCD_str(site_m22,"c_q?", WHITE,color[1]);
+         Site_t site_m23 = {32,16};   //x = 10 ,y = 20
+         LCD_num_BC(site_m23,origin_chao_cont,3, WHITE,color[1]);
+
+         Site_t site_m24 = {0,32};
+         LCD_str(site_m24,"c_z?", WHITE,color[2]);
+         Site_t site_m25 = {32,32};   //x = 10 ,y = 20
+         LCD_num_BC(site_m25,wrz_chao_cont,3, WHITE,color[2]);
+
+         Site_t site_m28 = {0,48};
+         LCD_str(site_m28,"c_h?", WHITE,color[3]);
+         Site_t site_m29 = {32,48};   //x = 10 ,y = 20
+         LCD_num_BC(site_m29,huan_chao_cont,3, WHITE,color[3]);
+
+         Site_t site_m30 = {0,64};
+         LCD_str(site_m30,"ting?", WHITE,color[4]);
+         Site_t site_m31 = {32,64};   //x = 10 ,y = 20
+         LCD_num_BC(site_m31,4,3, WHITE,color[4]);
+
+         Site_t site_m32 = {0,80};
+         LCD_str(site_m32,"5_", WHITE,color[5]);
+         Site_t site_m33 = {32,80};   //x = 10 ,y = 20
+         LCD_num_BC(site_m33,5,3, WHITE,color[5]);
+
+         Site_t site_m34 = {0,96};
+         LCD_str(site_m34,"6_", WHITE,color[6]);
+         Site_t site_m35 = {32,96};   //x = 10 ,y = 20
+         LCD_num_BC(site_m35,6,3, WHITE,color[6]);
+
+         Site_t site_m26 = {0,112};
+         LCD_FSTR_CH(site_m26,page_down ,WHITE, color[7]) ;     //下一页
+         Site_t site_m27 = {64,112};
+         LCD_FSTR_CH(site_m27,break_menu ,WHITE, color[8]) ;     //返回主菜单
+
+}
+
+/*******************************************************************************
   * Function Name: void deal_key_down_1()
   * Input Param  : 无
   * Output Param : 无
@@ -607,6 +715,18 @@ void color_change()
     case 4:
       {
         i=flag_key_l_u_4;
+        color[i]=BLUE;
+      }
+      break;
+    case 5:
+      {
+        i=flag_key_l_u_5;
+        color[i]=BLUE;
+      }
+      break;
+    case 6:
+      {
+        i=flag_key_l_u_6;
         color[i]=BLUE;
       }
       break;

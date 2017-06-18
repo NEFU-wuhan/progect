@@ -37,6 +37,7 @@ extern unsigned char page_down[3*16*2] ;         // 下一页
 extern unsigned char exposure[2*16*2] ;          // 曝光
 extern unsigned char didianya[4*16*2] ;          // 低电压报警
 extern unsigned char celue[3*16*2] ;             // 策略
+extern unsigned char shezhi[3*16*2] ;             // 策略
 extern unsigned char datuxiang[4*16*2] ;         // 大图像
 extern unsigned char change_speed[2*16*2] ;      // 变速
 extern unsigned char yes[1*16*2] ;               // 是
@@ -53,6 +54,8 @@ extern unsigned char cross_zi[2*16*2] ;          // 十字
 extern unsigned char speed_max_zi[4*16*2] ;      // 最大速度
 extern unsigned char other_canshu[5*16*2] ;      // 其他参数
 extern unsigned char start_go[3*16*2] ;             // 发车
+extern unsigned char tingche[2*16*2] ;          // 停车
+
 extern const unsigned short int nBitmapDot[] ;                  // 数据表
 extern const unsigned short int DuoLaAMeng[128*128];
 

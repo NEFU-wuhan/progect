@@ -21,6 +21,7 @@
 #include "main.h"
 #include "O_speed.h"
 #include "O_dir.h"
+#include "VCAN_camera.h"
 
 //#include "NRF24L0.h"
 //#include "NRF24L0_MSG.h"
@@ -31,7 +32,8 @@ int8 flag_key_l_u_1=0;
 int8 flag_key_l_u_2=0;
 int8 flag_key_l_u_3=0;
 int8 flag_key_l_u_4=0;
-
+int8 flag_key_l_u_5=0;
+int8 flag_key_l_u_6=0;
 
 //-------------------------------------------------
 //                 舵机控制
@@ -69,7 +71,7 @@ void deal_key_event()
     while(get_key_msg(& keymsg))     //获得按键就进行处理
     {
         color_init();
-        shua_one=0;
+        shua_one=0; //按下按键就允许特殊页面刷屏一次
         if(keymsg.status == KEY_DOWN)
         {
             switch(keymsg.key)
@@ -181,6 +183,15 @@ void deal_key_event()
             case KEY_B:                //长按 OK 键 同步全部数据并显示
               //  var_syn(VAR_MAX);       //同步全部 ,必须先同步再显示全部，因为有可能同步失败。
               //  var_display(VAR_MAX);   //显示全部
+
+//                disable_irq(PIT0_IRQn);
+//                disable_irq(PIT2_IRQn);
+
+                  record_ext();       //存储
+
+   //             enable_irq(PIT0_IRQn);
+//                enable_irq(PIT2_IRQn);
+
                 break;
 
             case KEY_START:
@@ -221,55 +232,46 @@ void deal_key_select()
     {
          switch(flag_key_l_u_0)
             {
-             case 0:       //显示菜单页面
+             case 1:       //显示菜单页面
               {
                    flag_key_select=1;
                    flag_key_l_u_0=0;
               }
               break;
 
-            case 1:        //显示图像页面
+            case 2:        //显示图像页面
               {
                    flag_key_select=2;
                    flag_key_l_u_0=0;
               }
               break;
 
-            case 2:        //显示舵机参数页面
+            case 3:        //显示舵机参数页面
               {
                    flag_key_select=3;
                    flag_key_l_u_0=0;
               }
               break;
 
-            case 3:        //显示电机参数页面
+            case 4:        //显示电机参数页面
               {
                    flag_key_select=4;
                    flag_key_l_u_0=0;
               }
               break;
-            case 4:       //开车
+            case 5:       //开车页面（不刷屏）
               {
-                DELAY_MS(500);
-                DJ_protect=0;
-                Motor_En=1;
-                if(front_car == 1)
-                {
-                  speedwantD=speedwantD_set;
-                  speedwantE=speedwantE_set;
-                }
-                else
-                {
-                  speedwantD=speedwantD_set;
-                  speedwantE=speedwantE_set + 7;
-                }
-
                 flag_key_select=5;
                 flag_key_l_u_0=0;
-                var2=1;
-                updata_var(VAR2);                //更新编号变量的值（修改变量的值后，需要调用此函数来更新编号变量的值）
-                tongbu[2]=10;
 
+                car_start_key();   //按键发车函数
+                Motor_En=1;
+              }
+              break;
+            case 6:        //显示电机参数页面
+              {
+                   flag_key_select=6;
+                   flag_key_l_u_0=0;
               }
               break;
             }
@@ -357,7 +359,7 @@ void deal_key_select()
             break;
            case 7:       //表示现在停留在电机信息显示页的“下一页”
             {
-                 flag_key_select=0;
+                 flag_key_select=6;
                  flag_key_l_u_4=0;
             }
             break;
@@ -372,13 +374,48 @@ void deal_key_select()
     break;
   case 5:        //表示现在停留在开车显示页面
     {
-      flag_key_select=0;
-      fache=0;
-      speedwantD=0;
-      speedwantE=0;
-      var2=0;
-      updata_var(VAR2);                //更新编号变量的值（修改变量的值后，需要调用此函数来更新编号变量的值）
-      tongbu[2]=10;
+      switch(flag_key_l_u_5)
+      {
+        case 1:       //表示现在停留在开车显示页的“停车”
+            {
+                 flag_key_select=0;
+                 flag_key_l_u_5=0;
+
+                 car_stop(0);
+            }
+            break;
+        case 2:       //表示现在停留在开车显示页的“返回菜单”
+            {
+                 flag_key_select=0;
+                 flag_key_l_u_5=0;
+            }
+            break;
+      }
+    }
+    break;
+  case 6:        //表示现在停留在其他信息显示页面
+    {
+         switch(flag_key_l_u_6)
+          {
+           case 0:       //表示现在停留在电机信息显示页的“上一页”
+            {
+                 flag_key_select=4;
+                 flag_key_l_u_6=0;
+            }
+            break;
+           case 7:       //表示现在停留在电机信息显示页的“下一页”
+            {
+                 flag_key_select=0;
+                 flag_key_l_u_6=0;
+            }
+            break;
+           case 8:       //表示现在停留在电机信息显示页的“返回菜单”
+            {
+                 flag_key_select=0;
+                 flag_key_l_u_6=0;
+            }
+            break;
+          }
     }
     break;
   default:
@@ -389,6 +426,8 @@ void deal_key_select()
         flag_key_l_u_2=0;
         flag_key_l_u_3=0;
         flag_key_l_u_4=0;
+        flag_key_l_u_5=0;
+        flag_key_l_u_6=0;
     }
     break;
   }
@@ -455,7 +494,8 @@ void deal_key_left()
               break;
             case 4:
               {
-                //  F_p-=5;
+                MID_dir_duty--;
+                Mid_duty--;
               }
               break;
             case 5:
@@ -545,8 +585,7 @@ void deal_key_left()
               break;
             case 1:
               {
-                   weizhi_turn--;
-//                   tongbu[1]=1;
+                camera_boundary--;
               }
               break;
             case 2:
@@ -562,6 +601,61 @@ void deal_key_left()
             case 4:
               {
              //   Menu_data_num[2]-=5;  //  flag_chasu--;
+              }
+              break;
+            case 5:
+              {
+            //    Kd2-=1;
+             //   Kd22-=1;
+              }
+              break;
+            case 6:
+              {
+            //   p2-=0.01;
+              }
+              break;
+            case 7:     //下一页
+              {
+
+              }
+              break;
+            case 8:    //返回菜单
+              {
+
+              }
+              break;
+            }
+      }
+    case 6:
+      {
+          switch (flag_key_l_u_6)      //调整shezhi的参数
+            {
+            case 0:       //上一页
+              {
+
+              }
+              break;
+            case 1:
+              {
+                   if(origin_chao_cont==1) origin_chao_cont=0;
+                   else origin_chao_cont=1;
+              }
+              break;
+            case 2:
+              {
+                   if(wrz_chao_cont==1) wrz_chao_cont=0;
+                   else wrz_chao_cont=1;
+              }
+              break;
+            case 3:
+              {
+                   if(huan_chao_cont==1) huan_chao_cont=0;
+                   else huan_chao_cont=1;
+              }
+              break;
+            case 4:
+              {
+
               }
               break;
             case 5:
@@ -650,7 +744,8 @@ void deal_key_right()
               break;
             case 4:
               {
-                //   F_p+=5;
+                MID_dir_duty--;
+                Mid_duty--;
               }
               break;
             case 5:
@@ -739,8 +834,7 @@ void deal_key_right()
               break;
             case 1:
               {
-                    weizhi_turn++;
-//                    tongbu[1]=1;
+                camera_boundary++;  //  flag_chasu--;
               }
               break;
             case 2:
@@ -782,6 +876,62 @@ void deal_key_right()
               break;
             }
       }
+    case 6:
+      {
+          switch (flag_key_l_u_6)      //调整设置页的参数
+            {
+            case 0:       //上一页
+              {
+
+              }
+              break;
+            case 1:
+              {
+                   if(origin_chao_cont==1) origin_chao_cont=0;
+                   else origin_chao_cont=1;
+              }
+              break;
+            case 2:
+              {
+                   if(wrz_chao_cont==1) wrz_chao_cont=0;
+                   else wrz_chao_cont=1;
+              }
+              break;
+            case 3:
+              {
+                   if(huan_chao_cont==1) huan_chao_cont=0;
+                   else huan_chao_cont=1;
+              }
+              break;
+            case 4:
+              {
+
+              }
+              break;
+            case 5:
+              {
+            //    Kd2-=1;
+             //   Kd22-=1;
+              }
+              break;
+            case 6:
+              {
+            //   p2-=0.01;
+              }
+              break;
+            case 7:     //下一页
+              {
+
+              }
+              break;
+            case 8:    //返回菜单
+              {
+
+              }
+              break;
+            }
+      }
+
     }
 }
 
@@ -797,51 +947,69 @@ void deal_key_right()
 void deal_key_up()
 {
   switch (flag_key_select)
+  {
+  case 0:
     {
-    case 0:
-      {
-        if(flag_key_l_u_0==0)
-          flag_key_l_u_0=4;
-        else
-          flag_key_l_u_0 --;
+      if(flag_key_l_u_0==0)
+        flag_key_l_u_0=6;
+      else
+        flag_key_l_u_0 --;
 
-      }
-      break;
-    case 1:
-      {
-        if(flag_key_l_u_1==0)
-          flag_key_l_u_1=1;
-        else
-          flag_key_l_u_1 --;
-
-      }
-      break;
-    case 2:
-      {
-        if(flag_key_l_u_2==0)
-          flag_key_l_u_2=8;
-        else
-          flag_key_l_u_2 --;
-      }
-      break;
-    case 3:
-      {
-        if(flag_key_l_u_3==0)
-          flag_key_l_u_3=8;
-        else
-          flag_key_l_u_3 --;
-      }
-      break;
-    case 4:
-      {
-
-        if(flag_key_l_u_4==0)
-          flag_key_l_u_4=8;
-        else
-          flag_key_l_u_4 --;
-      }
-      break;
     }
+    break;
+  case 1:
+    {
+      if(flag_key_l_u_1==0)
+        flag_key_l_u_1=1;
+      else
+        flag_key_l_u_1 --;
+
+    }
+    break;
+  case 2:
+    {
+      if(flag_key_l_u_2==0)
+        flag_key_l_u_2=8;
+      else
+        flag_key_l_u_2 --;
+    }
+    break;
+  case 3:
+    {
+      if(flag_key_l_u_3==0)
+        flag_key_l_u_3=8;
+      else
+        flag_key_l_u_3 --;
+    }
+    break;
+  case 4:
+    {
+
+      if(flag_key_l_u_4==0)
+        flag_key_l_u_4=8;
+      else
+        flag_key_l_u_4 --;
+    }
+    break;
+  case 5:
+    {
+
+      if(flag_key_l_u_5==0)
+        flag_key_l_u_5=2;
+      else
+        flag_key_l_u_5 --;
+    }
+    break;
+  case 6:
+    {
+
+      if(flag_key_l_u_6==0)
+        flag_key_l_u_6=8;
+      else
+        flag_key_l_u_6 --;
+    }
+    break;
+  }
 
 }
 
@@ -861,7 +1029,7 @@ void deal_key_down()
     case 0:
       {
         flag_key_l_u_0 ++;
-        if(flag_key_l_u_0>4)
+        if(flag_key_l_u_0>6)
           flag_key_l_u_0=0;
       }
       break;
@@ -893,8 +1061,22 @@ void deal_key_down()
           flag_key_l_u_4=0;
       }
       break;
-    }
+    case 5:
+      {
+        flag_key_l_u_5 ++;
+        if(flag_key_l_u_5>2)
+          flag_key_l_u_5=0;
+      }
+      break;
 
+    case 6:
+      {
+        flag_key_l_u_6 ++;
+        if(flag_key_l_u_6>8)
+          flag_key_l_u_6=0;
+      }
+      break;
+    }
 }
 
 

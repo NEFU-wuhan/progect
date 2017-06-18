@@ -19,6 +19,8 @@ extern int speedwantE;
 
 extern long int DJ_protect;
 
+extern uint8 wrz_distance;   //直道超车记步
+
 extern long int speedlasterror;
 extern long int speedlasterror2;
 
@@ -39,6 +41,7 @@ extern float Kd22;
 
 extern int32 Total_distance;       //总路程
 
+
 extern void init_motor();   //电机初始化
 extern void Spd_Dtc_Get();
 extern void speed_input();
@@ -46,7 +49,10 @@ extern void Motor_protect();
 extern uint8 flag_change_speed;
 extern void dj_protect(long int rval,long int lval);
 extern int16 Car_Speed_average[8] ;
-
+extern void car_start(uint8 single);
+extern void car_stop(uint8 single);
+extern void car_start_key();
+extern void nrf_start_stop();
 
 #endif
 

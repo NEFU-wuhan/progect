@@ -73,7 +73,7 @@ void img_sd_save(uint8 * imgaddr,uint32 size)
         if(time > F_SYNC_TIME)
         {
             time = 0 ;
-            f_sync(&vcansrc);
+//            f_sync(&vcansrc);
         }
     }
 }

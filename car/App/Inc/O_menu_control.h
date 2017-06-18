@@ -23,6 +23,7 @@ extern int8 Motor_En;      //电动机使能 0--disable  1--enable
 
 extern uint8 Servos_En;
 
+extern int8 Ramp_flag;
 
 extern short int nextError;
 
@@ -40,11 +41,13 @@ extern long int rightval;
 extern long int leftval;
 extern int16 dianya;
 extern int16 flag_didianya;
-extern uint8 boma[4];
+extern uint8 boma[8];
 
 extern uint32 zhenshu_count;
 extern uint32 camera_zhenshu;
 extern uint8 display_zs;
+extern uint8 display_zs_min;
+
 ////////////////////////////  函数定义  ////////////////////////
 extern int16 bat_voltage_measure();
 extern void Time_Commen();

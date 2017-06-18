@@ -41,6 +41,9 @@
 
 #define Zone_Size   100000    //记录500s的数据
 #define Last_Zone_Index  500000
+
+extern uint8 SD_save_flag;
+
 extern uint8  SD_OK,SaveData;
 extern uint8  SDHC_Buff[512];
 extern uint8  Zone_Index;

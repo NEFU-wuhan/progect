@@ -51,6 +51,7 @@ typedef enum
 extern void img_extract(uint8 *dst, uint8 *src);
 extern void img_extract1(uint8 *dst, uint8 *src);
 
+extern uint16 camera_boundary;
 
 // 摄像头 接口统一改成 如下模式
 
@@ -67,7 +68,6 @@ extern void img_extract1(uint8 *dst, uint8 *src);
 // #define  CAMERA_USE_HREF    1     //是否使用 行中断 (0 为 不使用，1为使用)
 // #define  CAMERA_COLOR       1     //摄像头输出颜色 ， 0 为 黑白二值化图像 ，1 为 灰度 图像 ，2 为 RGB565 图像
 // #define  CAMERA_POWER       0     //摄像头 电源选择， 0 为 3.3V ,1 为 5V
-
 
 
 #endif

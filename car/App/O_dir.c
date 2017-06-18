@@ -29,7 +29,7 @@ float Kp;
 float error,error_d,error_pre; //偏差
 float index_A,index_B;    //index_A为斜率  index_B为截距   斜率一般更为常用
 
-
+uint8 set_midline=64;
 
 uint8 quan1[70]={
    1,  1,  1,  1,  1, 1,  2,  2,  2,  2,
@@ -116,59 +116,56 @@ void quan_dir_duty_new()
  {
     uint8 i;                                        //利用赛道宽度检测坡道
     static int32 num,add;
-//	if(left_lost_count>=40&&right_add_point_count>=10)         //防止出十字的时候偏差突然增大  因为图像补线而反向跳变
-//    {
-//        for(i=40;i<line_num;i++)
-//        {
-//            if(line[i].mid_line_new==0)
-//            {
-//				line[i].mid_line_new=255;
-//				used_length=i;
-//				break;
-//            }
-//		}
-//	}
-//	if(right_lost_count>=40&&left_add_point_count>=10)
-//    {
-//        for(i=40;i<line_num;i++)
-//        {
-//            if(line[i].mid_line_new==129)
-//            {
-//				line[i].mid_line_new=255;
-//				used_length=i;
-//				break;
-//            }
-//		}
-//	}
+
+
+    if(origin_chao_cont==1)
+    {
+      if(Motor_En==0) var4=1;
+      set_midline=origin_chao( mid_line );
+    }
+    else
+    {
+      if(Motor_En==0) var4=0;
+    }
+    //弯道进直道超车
+    if(wrz_chao_cont==1 )     //&& Total_distance>250
+    {
+      set_midline=wrz_chao( 1 );
+    }
 
     for(i=0;i<line_num;i++)                  //正常赛道加权有用行以内的
      {
         if((line[i].mid_line_new)==255)      //line[used_length].mid_line_new  就等于255
          {
-            break;
+            break;                                                //&& Ramp_flag==0
          }
-//            if(i<used_length)
-//             {
+        if(line[i].line_case_mode != starline)
+        {
+          if( (L_wrz_flag==3 || L_wrz_flag==2 || L_wrz_flag==1 ) && xia_no==0  )   //完全出环道之后才开始寻左线或寻右线
+            num=(line[i].left_line+16)*quan1[i]+num;       //加权每一行的zuo坐标
+          else if( (R_wrz_flag==3 || R_wrz_flag==2 || R_wrz_flag==1) && xia_no==0 )   //&& Ramp_flag==0
+            num=(line[i].right_line-16)*quan1[i]+num;       //加权每一行的you坐标
+          else
             num=(line[i].mid_line_new)*quan1[i]+num;       //加权每一行的mid_line_new坐标
-            add=add+quan1[i];
-//             }
+          add=add+quan1[i];
+        }
      }
     /*出十字算法  实验阶段*/
-	if((shi_zi_count==1&&never_shi_zi_count==0||shi_zi_count==2)&&lost_count>=8)
-	{
-	     for(i=0;i<line_num;i++)
-	     {
-	         if((line[i].mid_line_new)==255)      //line[used_length].mid_line_new  就等于255
-	         {
-	            break;
-	         }
-			 if(line[i].line_case_mode!=all_lose)
-			 {
-		         num=(line[i].mid_line_new)*quan1[i]+num;       //加权每一行的mid_line_new坐标
-		         add=add+quan1[i];
-			 }
-	     }
-	}
+    if((shi_zi_count==1&&never_shi_zi_count==0||shi_zi_count==2)&&lost_count>=8)
+    {
+      for(i=0;i<line_num;i++)
+      {
+        if((line[i].mid_line_new)==255)      //line[used_length].mid_line_new  就等于255
+        {
+          break;
+        }
+        if(line[i].line_case_mode!=all_lose)
+        {
+          num=(line[i].mid_line_new)*quan1[i]+num;       //加权每一行的mid_line_new坐标
+          add=add+quan1[i];
+        }
+      }
+    }
 
     if(add>0)
     {
@@ -190,69 +187,8 @@ void quan_dir_duty_new()
         mid_line=0;
      }
 
-	if(shi_zi_count>=2)        //0 代表入十字的前一刻   1代表进十字  2代表出十字             //十字清零
-	    shi_zi_count=0;
-//	if(lost_count>=10&&add_point_count>=30)     //两边丢线且根据拐点补线到达一定的数量
-//	{
-//        mid_line=(mid_line_last[0]+mid_line_last[1]+mid_line_last[2]+mid_line_last[3]+mid_line_last[4])/5;
-//		mid_line_last[0]=mid_line;
-//	}
-
-//	if(lost_count>=20)
-//	{
-//        if((mid_line_last[0]-mid_line_last[1])*(mid_line_last[1]-mid_line_last[2])<0)     //发生了不符合变化规律的突变
-//        {
-//            if(ABS(mid_line_last[1]-shizi_new)>10)    //如果突变较大
-//				mid_line=shizi_new;
-//			else                                      //如果突变较小
-//	            mid_line=mid_line_last[1]+(mid_line_last[1]-mid_line_last[2]);
-//		  }
-//	}
-       uint8 set_midline=64;
-       static uint8 z=0,h=0;
-       if(Total_distance<170   //发车前两米内，一个车靠左一个车靠右
-          && var4==0)    // 只有在超车未完成的时候在进入
-       {
-          used_length=30;
-          if(sequence==1)   //前车靠左
-          {
-            set_midline=85;  //77
-            if(Total_distance>30 && Total_distance<35 && z==0 && chao_one2==0)    //前车在指定位置停车
-            {
-              z++;
-              chao_one2=1;
-              speedwantD=0;
-              speedwantE=0;
-            }
-          }
-          else              //后车靠右
-          {
-            set_midline=51;
-          }
-       }
-       if(sequence==1)   //停下的车检测到超声波之后恢复正常
-       {
-         if(road_count_chao>18 && chao_one2==1 && h==0)    //前车停车等待超车完成时若超声波能检测到数据，证明超车完成
-         {
-           chao_one2=0;
-           h++;
-
-           var4=1;         //并且环道切换标志同步（表示正在切换，切换完成后清零）
-           updata_var(VAR4);
-           tongbu[4]=10;
-
-           speedwantD=speedwantD_set;
-           speedwantE=speedwantE_set;
-           set_midline=64;
-         }
-       }
-       else              //超过去的车接收到NRF信号之后恢复正常
-       {
-         if(var4==1)
-         {
-           set_midline=64;
-         }
-       }
+    if(shi_zi_count>=2)        //0 代表入十字的前一刻   1代表进十字  2代表出十字             //十字清零
+        shi_zi_count=0;
 
 	error_pre=error;
 	error=set_midline-mid_line;    //左转 error>0   右转 error<0
@@ -260,8 +196,29 @@ void quan_dir_duty_new()
 //	dealt_error=error_d/(0.035);
  }
 
+float huandao(float piancha)
+{
+  int lin;
+  int flag=0;
+  int num1=0,add1=0;
+  int num_count;
+  float left_Sabc1=0;
+  float right_Sabc1=0;
+  int i;
+  float a;
 
 
+//  if(fiag_huan==0)
+//  {
+//
+//    return Kp1=11.5;
+//  }
+//  else
+//  {
+//      return Kp1=15;
+//  }
+
+}
 /*舵机PD控制函数*/    //可以尝试别的算法 这个算法有它的局限性
 #define nWidth  128
 #define nHeight 70
@@ -270,6 +227,8 @@ void DJ_PID(void)
     //可以加前馈补偿PID
 //    if(ABS(error)<=30)        //小弯大D值，小打角就好        大弯小D值  打角别太猛
 //		Kd=800;
+//  Kp1=huandao(error);
+
 	sqrt_16_kp2=sqrt_16((nHeight-used_length)*(nHeight-used_length)*(nHeight-used_length));
 //    Kp=Kp1+(nHeight-used_length)*(nHeight-used_length)*Kp2/100;
     Kp=Kp1+sqrt_16_kp2*Kp2/50.0;

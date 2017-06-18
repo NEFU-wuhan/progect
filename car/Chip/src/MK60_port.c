@@ -69,14 +69,14 @@ void porta_handler(void)
 {
     uint8  n = 0;    //引脚号
 
-    //PTA6
-    n = 6;
-    if(PORTA_ISFR & (1 << n))           //PTA6触发中断
+    //PTA19
+    n = 19;
+    if(PORTA_ISFR & (1 << n))           //PTA19触发中断
     {
         PORTA_ISFR  = (1 << n);        //写1清中断标志位
 
         /*  以下为用户任务  */
-
+         measure_distance();
 
         /*  以上为用户任务  */
     }

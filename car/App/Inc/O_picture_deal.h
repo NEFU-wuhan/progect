@@ -27,6 +27,10 @@ extern uint8 follow_huan;    //1 为寻左线，0为寻右线
 extern uint8 hehe,hehe1;
 extern uint8 xia_no;
 extern uint8 road_count_chao;
+extern uint8 road_wide_chao[];
+extern uint8 R_wrz_flag;
+extern uint8 L_wrz_flag;
+
 
 typedef enum
 {
@@ -36,7 +40,8 @@ typedef enum
     left_lose_right_normal,
     all_normal,
     all_lose,
-    all_back_line
+    all_back_line,
+    starline
 }line_case;
 
 typedef struct
@@ -61,8 +66,19 @@ typedef struct
 
 } line_info;
 
+
+extern uint8 zhi_dao_flag;
+extern uint8 wrz_flag;
 extern line_info  line[line_num];
 extern uint8  all_left_line[line_num][20];
 extern uint8  all_right_line[line_num][20];
+extern uint8 origin_chao( uint8 cut );
+//起跑线识别
+extern uint8 left_lost_count;
+extern uint8 right_lost_count;
+extern uint8 yiting;
+extern int ccout;
+extern uint8 stop_count;
+
 
 #endif //___GEMINI_PICTURE_DEAL_H

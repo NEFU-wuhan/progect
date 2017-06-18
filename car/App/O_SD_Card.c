@@ -11,6 +11,7 @@
 #define SD_DI  PTE3_IN    // ‰»Î
 #define SD_DO  PTE1_OUT    // ‰≥ˆ
 
+uint8 SD_save_flag=0;
 
 uint8   SDHC_Buff[512];
 uint8   SD_OK=0;

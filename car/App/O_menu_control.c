@@ -11,11 +11,12 @@ int32 Menu_data_num[20];//数据存储区
 uint32 System_time=0;          //单次开机系统时间
 uint32 Start_timing=0;          //发车计时
 
-uint8 Time_En=1;               //计时使能标识位
+uint8 Time_En=0;               //计时使能标识位
 int8 Motor_En;      //电动机使能 0--disable  1--enable
 
-uint8 Cross_flag;
-uint8 Trick_flag;
+uint8 Cross_flag=0;
+uint8 Trick_flag=0;
+int8 Ramp_flag=0;            //坡道标志  -1：下坡  0：平路  1：上坡   Ramp_flag_pre
 
 uint8 Servos_En=0;
 
@@ -25,10 +26,11 @@ short int nextError;
 int32 speedaboutangle;
 int32 speedaboutangle2;
 int32 speedaboutangle_zong;
-uint8 boma[4];
+uint8 boma[8];
 uint32 zhenshu_count;
 uint32 camera_zhenshu;
 uint8 display_zs;
+uint8 display_zs_min=100;
 //电机差速系数
 float p1=0.0013;//原值0.8043     0.004076    0.006576
 float p2=0.9252;//原值1.0220

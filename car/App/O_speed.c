@@ -23,7 +23,6 @@ int32 leijia;
 
 long int DJ_protect=0;
 
-int8 Ramp_flag=0;            //坡道标志  -1：下坡  0：平路  1：上坡   Ramp_flag_pre
 uint8 Final_line_flag;
 
 short int speedwant_R;
@@ -59,6 +58,7 @@ int speed_exact[8];
 int speed_exact2[8];
 
 int16 Car_Speed_average[8] ;
+uint8 wrz_distance=0;     //直道超车记步
 //-------------------------------------------------
 //                 电机初始化
 //输入
@@ -182,7 +182,6 @@ void speedcontrol5()
 //日期 2016-06-24
 //作者
 //--------------------------------------------------
-
 void Spd_Dtc_Get()
 {
     static int16 Speed_pre,Spees_pre_pre,Car_Speed;
@@ -217,6 +216,10 @@ void Spd_Dtc_Get()
     {
       number= (Distance_Current_Pule/Pule_to_Dtc_Proportion);
       Total_distance+= number ;       //总路程累加
+
+       if((L_wrz_flag==1||R_wrz_flag==1||L_wrz_flag==2||R_wrz_flag==2) && xia_no==0 && Ramp_flag==1 ) //完全出环道之后才开始记步停车
+        wrz_distance+=number;
+
       Distance_Current_Pule-=(Pule_to_Dtc_Proportion*number);  //脉冲计数对应减少
     }
 
@@ -235,39 +238,46 @@ void Spd_Dtc_Get()
 //--------------------------------------------------
 void speed_input()
 {
-   if((int)s_distance<100&&(int)s_distance>5)//距离小于3m,大于0.05m有效
+  uint16 control_dis=70;
+   if((int)s_distance<150&&(int)s_distance>5)//距离小于3m,大于0.05m有效
     {
-      speedwantB=speedwantD;    //speedwantC
-//      speedwant=speedwantD;
-	if(s_distance<20)
+      speedwantB=speedwantD;
+
+	if(s_distance<(control_dis-50))
           speedwant =(int) (speedwantB * 0.5);
-        else if(s_distance<25)
+        else if(s_distance<(control_dis-40))
           speedwant =(int) (speedwantB * 0.6);
-        else if(s_distance<30)
+        else if(s_distance<(control_dis-30))
           speedwant =(int) (speedwantB * 0.7);
-        else if(s_distance<40)
+        else if(s_distance<(control_dis-20))
           speedwant =(int) (speedwantB * 0.8);
-        else if(s_distance<50)
+        else if(s_distance<(control_dis-10))
           speedwant =(int) (speedwantB *0.90);
-        else if(s_distance<55)
+        else if(s_distance<(control_dis-5))
           speedwant =(int) (speedwantB * 0.95);
-        else if(s_distance<65)                           //速度系数最接近1的时候，就是所控制的距离。
+
+        else if(s_distance==(control_dis))          //速度系数最接近1的时候，就是所控制的距离。
+          speedwant =(int) (speedwantB );
+
+        else if(s_distance<(control_dis+5))
           speedwant =(int) (speedwantB * 1.1);
-        else if(s_distance<70)
+        else if(s_distance<(control_dis+15))
           speedwant =(int) (speedwantB * 1.15);
-        else if(s_distance<95)
+        else if(s_distance<(control_dis+30))
           speedwant =(int) (speedwantB * 1.2);
         else
           speedwant =(int) (speedwantB * 1.22);
 
-        if(speedwant>(int)(speedwantB*1.10))//避免速度失控
-          speedwant=(int)(speedwantB*1.10);
+        if(speedwant>(int)(speedwantB*1.30))//避免速度失控
+          speedwant=(int)(speedwantB*1.30);
     }
     else
       speedwant =speedwantE;//(int)(speedwantB * 1.2) ;//超声波丢失的话保持设定速度100;//50;//(
 //       printf("%d/n",speedwant);      speedwantC
 //       printf("%d\n",s_distance);
 //   if(fiag_huan) speedwant=0;
+   if( Ramp_flag==1 ) speedwant=50;
+
 }
 
 /*******************************************
@@ -294,3 +304,107 @@ void dj_protect(long int rval,long int lval)
 //        }
 //    }
 }
+
+//-------------------------------------------------
+//                 开车
+//输入 void
+//输出
+//功能 发车时需要更改的变量及需要执行的函数
+//日期
+//作者
+//说明 single为 0 表示双车都启动，为 1 表示单车启动
+//--------------------------------------------------
+void car_start(uint8 single)
+{
+  speedwantD=speedwantD_set;
+  speedwantE=speedwantE_set;
+
+  if(single==0)
+  {
+    var2=1;
+    updata_var(VAR2);                //更新编号变量的值（修改变量的值后，需要调用此函数来更新编号变量的值）
+    tongbu[2]=10;
+  }
+}
+
+//-------------------------------------------------
+//                 停车
+//输入 void
+//输出
+//功能 停车时需要更改的变量及需要执行的函数
+//日期
+//作者
+//说明 single为 0 表示双车都停止，为 1 表示单车停止
+//--------------------------------------------------
+void car_stop(uint8 single)
+{
+  speedwantD=0;
+  speedwantE=0;
+  if(single==0)
+  {
+    var2=0;
+    updata_var(VAR2);                //更新编号变量的值（修改变量的值后，需要调用此函数来更新编号变量的值）
+    tongbu[2]=10;
+  }
+}
+
+//-------------------------------------------------
+//                 按键发车
+//输入 void
+//输出
+//功能 按键发车时需要更改的变量及需要执行的函数
+//日期
+//作者
+//--------------------------------------------------
+void car_start_key()
+{
+  if(front_car == 1)
+  {
+    speedwantD=speedwantD_set;
+    speedwantE=speedwantE_set;
+  }
+  else
+  {
+    speedwantD=speedwantD_set;
+    speedwantE=speedwantE_set + 3;
+  }
+  var2=1;
+  updata_var(VAR2);                //更新编号变量的值（修改变量的值后，需要调用此函数来更新编号变量的值）
+  tongbu[2]=10;
+
+}
+//-------------------------------------------------
+//                 无线（接受方）发停车
+//输入 void
+//输出
+//功能 NRF收到发车停车信号时需要更改的变量及需要执行的函数
+//日期
+//作者
+//--------------------------------------------------
+void nrf_start_stop()
+{
+  static uint8 input=0;
+  if(input!=var2 && tongbu[1]==0)
+  {
+    key_flag_clear=1;
+    shua_one=0;
+    if(var2==1)     //表示发车
+    {
+      Motor_En=1;
+      Time_En=1;
+      flag_key_select=5;
+      flag_key_l_u_0=0;
+
+      car_start(1);
+    }
+    else          //表示停车
+    {
+      flag_key_select=0;
+      flag_key_l_u_5=0;
+
+      car_stop(1);
+    }
+  }
+  input=var2;
+}
+

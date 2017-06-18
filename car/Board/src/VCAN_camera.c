@@ -52,8 +52,8 @@ void img_extract(void *dst, void *src, uint32_t srclen)
   uint8 *p_all;
   int i,j;
 
-  if(CAR_MODEL==1  ) camera_boundary=11;
-  else if(CAR_MODEL==2  ) camera_boundary=14;
+  if(CAR_MODEL==1  ) camera_boundary=25;
+  else if(CAR_MODEL==2  ) camera_boundary=12;
   else if(CAR_MODEL==3 ) camera_boundary=23;
   else camera_boundary=23;
   for(i=0;i<120;i++)

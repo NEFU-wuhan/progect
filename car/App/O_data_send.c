@@ -138,3 +138,4 @@ void VisualScope_Output(float data1 ,float data2 ,float data3 ,float data4)
   for(i=0;i<10;i++)
   uart_putchar(UART1,databuf[i]);
 }
+

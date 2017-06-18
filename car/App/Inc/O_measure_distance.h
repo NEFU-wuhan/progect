@@ -2,8 +2,8 @@
 #define _O_measure_distance_H
 
 
-#define ECHG    PTA19
-#define receive_flag   PTA24
+#define ECHG   PTB22// PTA19
+#define receive_flag  PTB23// PTA24
 
 
 #define FLAGWAIT    0xFFFFF
