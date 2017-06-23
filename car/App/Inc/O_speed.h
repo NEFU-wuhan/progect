@@ -18,6 +18,7 @@ extern int speedwantD;
 extern int speedwantE;
 
 extern long int DJ_protect;
+extern int16 Car_Speed_ave;
 
 extern uint8 wrz_distance;   //直道超车记步
 
@@ -41,6 +42,7 @@ extern float Kd22;
 
 extern int32 Total_distance;       //总路程
 
+extern uint8 car_go;
 
 extern void init_motor();   //电机初始化
 extern void Spd_Dtc_Get();
@@ -52,7 +54,8 @@ extern int16 Car_Speed_average[8] ;
 extern void car_start(uint8 single);
 extern void car_stop(uint8 single);
 extern void car_start_key();
-extern void nrf_start_stop();
+extern void uart_start_stop(uint8 go);
+
 
 #endif
 

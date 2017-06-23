@@ -4,32 +4,41 @@
 extern uint8 img[160*120];
 
 #define nrf_debug 0    //0-关闭无线传输， 1-开启无线传输
+
 extern uint8 CAR_MODEL;    //1-号车， 2-2号车， 3-3号车
 
+///////////******通信专用变量*******//////
+extern char info;
+
 /////////*******定义通信代号******//////////
-#define Start         'A'    //发车
-#define Respond       'B'   //应答
-#define Turn_right    'C'  //十字超车标志向右
-#define Turn_left     'D'  //十字超车标志向左
-#define Turn_finish   'E'   //十字超车完成
-#define Stop_pre      'F'   //停车预备标志位
+#define Start         'A'   //发车
+#define Respond       'B'   //jiasu
+#define huan_right    'C'   //环道超车标志向右
+#define huan_left     'M'   //环道超车标志向左   //不能用D，上电瞬间会自动发送一个'D'
+#define huan_finish   'E'   //环道超车完成
+#define Ramp          'F'   //坡道标志位
 #define Stop          'G'   //停车标志
 #define ZC_right      'H'   //直道超车区在右侧
 #define ZC_left       'I'   //直道超车区在左侧
-#define ZC_OK         'J'   //检测出离开直道超车区
+#define ZC_OK         'J'   //直道超车完成
 #define Block_right   'K'   //右侧障碍
 #define Block_left    'L'   //左侧障碍
+#define turn_car      'N'   //切换前后车的标志
 
+
+#define add_count(number,x) number<x?(number++):(number=x)              //3目运算：如果式子为真，表达式的值等于冒号前的式子
 
 extern uint8  var1, var2;
 extern uint16 var3, var4;
 extern uint32 var5, var6;
 
+extern uint8 chao_cnt_total;
 extern int16 speedwantD_set;
 extern int16 speedwantE_set;
 extern uint8 origin_chao_cont;
 extern uint8 huan_chao_cont;
 extern uint8 wrz_chao_cont;
+extern uint8 chao_car_cnt_set ;
 
 
 extern uint8 front_car,weizhi_turn;

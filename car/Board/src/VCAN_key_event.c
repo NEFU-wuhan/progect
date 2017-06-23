@@ -22,7 +22,7 @@
 #include "O_speed.h"
 #include "O_dir.h"
 #include "VCAN_camera.h"
-
+#include "VCAN_LCD.h"
 //#include "NRF24L0.h"
 //#include "NRF24L0_MSG.h"
 
@@ -158,6 +158,11 @@ void deal_key_event()
         {
             switch(keymsg.key)
             {
+
+              Site_t site;
+              site.x = 13;
+              site.y = 3;
+
             case KEY_U:                //长按上按键
                 {
                    //deal_key_up_1();
@@ -178,19 +183,16 @@ void deal_key_event()
 
             case KEY_R:
               //  var_select(VAR_NEXT_HOLD);
+                    SD_save_flag=1;
+                    LCD_str(site,"sd_OK...", BLACK,RED);
                 break;
 
             case KEY_B:                //长按 OK 键 同步全部数据并显示
               //  var_syn(VAR_MAX);       //同步全部 ,必须先同步再显示全部，因为有可能同步失败。
               //  var_display(VAR_MAX);   //显示全部
 
-//                disable_irq(PIT0_IRQn);
-//                disable_irq(PIT2_IRQn);
-
-                  record_ext();       //存储
-
-   //             enable_irq(PIT0_IRQn);
-//                enable_irq(PIT2_IRQn);
+                    record_ext();       //存储
+                    LCD_str(site,"record_OK...", BLACK,RED);
 
                 break;
 
@@ -263,9 +265,8 @@ void deal_key_select()
               {
                 flag_key_select=5;
                 flag_key_l_u_0=0;
-
+                DELAY_MS(500) ;
                 car_start_key();   //按键发车函数
-                Motor_En=1;
               }
               break;
             case 6:        //显示电机参数页面
@@ -286,12 +287,16 @@ void deal_key_select()
           {
                flag_key_select=0;
                flag_key_l_u_1=0;
+
+//               zhizhen=5;
           }
           break;
          case 1:       //表示现在停留在赛道显示页的“下一页”
           {
                flag_key_select=2;
                flag_key_l_u_1=0;
+
+//               img_sd_exit();
           }
           break;
         }
@@ -540,11 +545,13 @@ void deal_key_left()
 
               {
                 speedwantD_set-=5;
+                speedwantD=speedwantD_set;
               }
               break;
             case 3:
               {
                 speedwantE_set-=5;
+                speedwantE=speedwantE_set;
               }
               break;
             case 4:
@@ -590,27 +597,32 @@ void deal_key_left()
               break;
             case 2:
               {
+                follow_huan_set[1]--;
               //  game_plan--;
               }
               break;
             case 3:
               {
+                follow_huan_set[2]--;
 
               }
               break;
             case 4:
               {
+                follow_huan_set[3]--;
              //   Menu_data_num[2]-=5;  //  flag_chasu--;
               }
               break;
             case 5:
               {
+                follow_huan_set[4]--;
             //    Kd2-=1;
              //   Kd22-=1;
               }
               break;
             case 6:
               {
+                follow_huan_set[5]--;
             //   p2-=0.01;
               }
               break;
@@ -744,8 +756,8 @@ void deal_key_right()
               break;
             case 4:
               {
-                MID_dir_duty--;
-                Mid_duty--;
+                MID_dir_duty++;
+                Mid_duty++;
               }
               break;
             case 5:
@@ -789,11 +801,13 @@ void deal_key_right()
             case 2:
               {
                 speedwantD_set+=5;
+                speedwantD=speedwantD_set;
               }
               break;
             case 3:
               {
                 speedwantE_set+=5;
+                speedwantE=speedwantE_set;
               }
               break;
             case 4:
@@ -839,28 +853,33 @@ void deal_key_right()
               break;
             case 2:
               {
+                follow_huan_set[1]++;
               //  game_plan++;
               }
               break;
             case 3:
               {
+                follow_huan_set[2]++;
              //   if(flag_change_speed)   flag_change_speed=0;
              //   else   flag_change_speed=1;
               }
               break;
             case 4:
               {
+                follow_huan_set[3]++;
              //    Menu_data_num[2]+=5;//  flag_chasu++;
               }
               break;
             case 5:
               {
+                follow_huan_set[4]++;
              //  Kd2+=1;
              //  Kd22+=1;
               }
               break;
             case 6:
               {
+                follow_huan_set[5]++;
              //  p2+=0.01;
               }
               break;

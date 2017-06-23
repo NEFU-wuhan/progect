@@ -23,6 +23,7 @@ int32 leijia;
 
 long int DJ_protect=0;
 
+uint8 car_go;
 uint8 Final_line_flag;
 
 short int speedwant_R;
@@ -147,8 +148,9 @@ void speedcontrol5()
           if(speedaboutangle <-10000  &&  Motor_En==1)  speedaboutangle =-10000;
           if(speedaboutangle2> 10000  &&  Motor_En==1)  speedaboutangle2= 10000;
           if(speedaboutangle2<-10000  &&  Motor_En==1)  speedaboutangle2=-10000;
+
         ///////////////电机输出///////////////////////
-          if(speedaboutangle>0  &&  Motor_En==1)                       //2、5是左电机
+          if(speedaboutangle>0  &&  Motor_En==1)                       //2、5是you电机
           {
             ftm_pwm_duty(MOTOR_FTM, MOTOR2_PWM,0);
             ftm_pwm_duty(MOTOR_FTM, MOTOR5_PWM,speedaboutangle);
@@ -158,12 +160,12 @@ void speedcontrol5()
             ftm_pwm_duty(MOTOR_FTM, MOTOR2_PWM,-speedaboutangle);
             ftm_pwm_duty(MOTOR_FTM, MOTOR5_PWM,0);
           }
-         if(speedaboutangle2>0  &&  Motor_En==1)                        //3、6是右电机
+         if(speedaboutangle2>0  &&  Motor_En==1)                        //3、6是zuo电机
          {
           ftm_pwm_duty(MOTOR_FTM, MOTOR3_PWM,0);
           ftm_pwm_duty(MOTOR_FTM, MOTOR6_PWM,speedaboutangle2);
          }
-         else if(speedaboutangle2<=0  &&  Motor_En==1)
+         else if(speedaboutangle2<=0  &&  Motor_En==1   )
          {
           ftm_pwm_duty(MOTOR_FTM, MOTOR3_PWM,-speedaboutangle2);
           ftm_pwm_duty(MOTOR_FTM, MOTOR6_PWM,0);
@@ -276,7 +278,7 @@ void speed_input()
 //       printf("%d/n",speedwant);      speedwantC
 //       printf("%d\n",s_distance);
 //   if(fiag_huan) speedwant=0;
-   if( Ramp_flag==1 ) speedwant=50;
+   if( Ramp_flag==1 ) speedwant=90;
 
 }
 
@@ -321,9 +323,10 @@ void car_start(uint8 single)
 
   if(single==0)
   {
-    var2=1;
-    updata_var(VAR2);                //更新编号变量的值（修改变量的值后，需要调用此函数来更新编号变量的值）
-    tongbu[2]=10;
+    uart_putchar(UART3,Start);
+//    var2=1;
+//    updata_var(VAR2);                //更新编号变量的值（修改变量的值后，需要调用此函数来更新编号变量的值）
+//    tongbu[2]=10;
   }
 }
 
@@ -340,11 +343,13 @@ void car_stop(uint8 single)
 {
   speedwantD=0;
   speedwantE=0;
+
   if(single==0)
   {
-    var2=0;
-    updata_var(VAR2);                //更新编号变量的值（修改变量的值后，需要调用此函数来更新编号变量的值）
-    tongbu[2]=10;
+    uart_putchar(UART3,Stop);
+//    var2=0;
+//    updata_var(VAR2);                //更新编号变量的值（修改变量的值后，需要调用此函数来更新编号变量的值）
+//    tongbu[2]=10;
   }
 }
 
@@ -366,30 +371,32 @@ void car_start_key()
   else
   {
     speedwantD=speedwantD_set;
-    speedwantE=speedwantE_set + 3;
+    speedwantE=speedwantE_set ; // + 3
   }
-  var2=1;
-  updata_var(VAR2);                //更新编号变量的值（修改变量的值后，需要调用此函数来更新编号变量的值）
-  tongbu[2]=10;
+  uart_putchar(UART3,Start);
+  Time_En=1;
+  Motor_En=1;
+//  var2=1;
+//  updata_var(VAR2);                //更新编号变量的值（修改变量的值后，需要调用此函数来更新编号变量的值）
+//  tongbu[2]=10;
 
 }
 //-------------------------------------------------
-//                 无线（接受方）发停车
+//                 串口（接受方）发停车
 //输入 void
 //输出
-//功能 NRF收到发车停车信号时需要更改的变量及需要执行的函数
-//日期
-//作者
+//功能 串口收到发车停车信号时需要更改的变量及需要执行的函数
 //--------------------------------------------------
-void nrf_start_stop()
+void uart_start_stop( uint8 go)
 {
-  static uint8 input=0;
-  if(input!=var2 && tongbu[1]==0)
-  {
     key_flag_clear=1;
     shua_one=0;
-    if(var2==1)     //表示发车
+
+    if(go==1)     //表示发车
     {
+      key_flag_clear=1;
+      shua_one=0;
+
       Motor_En=1;
       Time_En=1;
       flag_key_select=5;
@@ -404,7 +411,5 @@ void nrf_start_stop()
 
       car_stop(1);
     }
-  }
-  input=var2;
-}
 
+}

@@ -21,8 +21,27 @@ int8 last_left_point[70];
 int8 last_right_point[70];
 int8 last_mid_point[70];
 /*计算斜率中点*/
-uint8 X_point[70];
-uint8 Y_point[70];
+uint8 X_point[70]=
+{
+   0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+  10,11,12,13,14,15,16,17,18,19,
+  20,21,22,23,24,25,26,27,28,29,
+  30,31,32,33,34,35,36,37,38,39,
+  40,41,42,43,44,45,46,47,48,49,
+  50,51,52,53,54,55,56,57,58,59,
+  60,61,62,63,64,65,66,67,68,69
+};
+uint8 Y_point[70]=
+{
+   0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+  10,11,12,13,14,15,16,17,18,19,
+  20,21,22,23,24,25,26,27,28,29,
+  30,31,32,33,34,35,36,37,38,39,
+  40,41,42,43,44,45,46,47,48,49,
+  50,51,52,53,54,55,56,57,58,59,
+  60,61,62,63,64,65,66,67,68,69
+};
+
 
 uint8 left_line_first;
 uint8 right_line_first;
@@ -30,9 +49,6 @@ uint8 left_line_first_flag;
 uint8 right_line_first_flag;
 #define l_judge_first_line(flag,y) flag==0?(left_line_first=y):(left_line_first=left_line_first)
 #define r_judge_first_line(flag,y) flag==0?(right_line_first=y):(right_line_first=right_line_first)
-
-#define add_count(number,x) number<x?(number++):(number=x)              //3目运算：如果式子为真，表达式的值等于冒号前的式子
-
 
 #define Normal_mid_line(x)   ABS(line[x].mid_line_new-64)<=5&&ABS(line[x+1].mid_line_new-64)<=5&&ABS(line[x+2].mid_line_new-64)<=5&&ABS(line[x+3].mid_line_new-64)<=5&&ABS(line[x+4].mid_line_new-64)<=5
 
@@ -59,10 +75,11 @@ uint8  all_right_line[line_num][20];
  uint8 road_wide_chao[20];
  uint8 xia_no=0;
  uint8 budiu=0;
+ uint8 huan_buxian_biger=0;
  uint8 huan_l_x=0,huan_r_x=0,huan_kuan=0,huan_kuan1_l=0,huan_kuan1_r=0,huan_loca=0;
  uint8 h_jiao=0,h_jiao_x=0,h_jiao6=0,h_jiao_x6=0,h_jiao_cnt=0;
  uint8 follow_huan;    //1 为寻左线，0为寻右线
-
+ uint8 follow_huan_set[6]={0};    //1 为寻左线，0为寻右线 2为两车都寻左线，3为两车都寻右线
 
 const uint8 distance[70]=
 {
@@ -147,7 +164,7 @@ uint16 road_wide_normal;
 int16 last_mid;
 uint32 shizi_new;     //十字新的算法，统计白的列数均值作为本次图像中值
 
-uint8 fiag_huan_r,fiag_huan_l,fiag_huan;
+uint8 fiag_huan_r,fiag_huan_l,fiag_huan,fiag_huan_yu;
 
 /***************直道判断变量****************/
         uint8 zhi_dao_flag;
@@ -193,6 +210,7 @@ void huan_judge( uint8 *src ,uint8 i );
 void huan_clear( uint8 i );
 void huan_along( uint8 i );
 void zhidao( uint8 i );
+void podao_judge( uint8 i );
 void start_line(uint8 *src);
 void start_line_stop() ;
 void R_wan_ru_zhi_judge();
@@ -221,16 +239,16 @@ void record_side_wide_part()
   for(j=0;j<num_po;j++)
   {
     po_road_wide_add_down0 += line[j].road_wide;
-    po_road_wide_add_up0   += line[69-j].road_wide;
+    po_road_wide_add_up0   += line[67-j].road_wide;
 
-    po_road_wide_ss[0][10-j]=line[69-j].road_wide ;
+    po_road_wide_ss[0][10-j]=line[67-j].road_wide ;
   }
   for(j=5;j<num_po+5;j++)
   {
     po_road_wide_add_down1 += line[j].road_wide;
-    po_road_wide_add_up1   += line[69-j].road_wide;
+    po_road_wide_add_up1   += line[67-j].road_wide;
 
-    po_road_wide_ss[0][10-j]=line[69-j].road_wide ;
+    po_road_wide_ss[0][10-j]=line[67-j].road_wide ;
   }
   po_road_wide_up[0][0]=po_road_wide_add_up0/num_po;
   po_road_wide_down[0][0]=po_road_wide_add_down0/num_po;
@@ -260,6 +278,49 @@ void recoed_xia_wide( uint8 i ,uint8 wider)
     road_count_chao++;
   }
 }
+
+//------------------------------------------------------------------------------
+//功能    十字底下全丢情况的补线
+//------------------------------------------------------------------------------
+void cross_adding_line( uint8 i )
+{
+//  if(last_lost_count>25)    //上一幅图片丢很多线
+//  {
+//    //--1--
+//    if(line[0].line_case_mode==left_lose_right_normal&&line[i].line_case_mode==all_lose)		  //十字从第一行开始丢
+//    {
+//      line[i].right_line=line[0].right_line-1;
+//    }
+//    if(line[0].line_case_mode==left_normal_right_lose&&line[i].line_case_mode==all_lose)		  //十字从第一行开始丢
+//    {
+//      line[i].left_line=line[0].left_line+1;
+//    }
+//    if(line[0].line_case_mode==all_lose&&line[i].road_wide-distance[i]>20)                            //十字从第一行就全丢
+//    {
+//      line[i].left_line=64-distance[i]/2;
+//      line[i].right_line=64+distance[i]/2;
+//      shi_zi_flag=1;
+//      if(never_shi_zi_count==0)
+//      {
+//        shi_zi_count++;
+//        never_shi_zi_count=1;      //不让其继续检测
+//      }
+//    }
+//  }
+//  if(shi_zi_count==1)
+//    shi_zi_baochi=0;    //入十字将保持标志位清零
+//  if(shi_zi_flag==1&&line[0].line_case_mode==all_lose&&line[i].line_case_mode==all_lose)
+//  {
+//    line[i].left_line=64-distance[i]/2;
+//    line[i].right_line=64+distance[i]/2;
+//  }
+//  if(last_lost_count<5||line[0].line_case_mode==all_normal)
+//  {
+//    shi_zi_flag=0;
+//    never_shi_zi_count=0;
+//  }
+}
+
 
 /*******************************************************************************
 * Function Name: median_line_extract();
@@ -295,6 +356,7 @@ void median_line_extract(uint8 *src)
     fiag_huan_r=0;
     fiag_huan_l=0;
     budiu=0;
+    huan_buxian_biger=0;
     huan_l_x=0,huan_r_x=0,huan_kuan=0,huan_kuan1_l=0,huan_kuan1_r=0,huan_loca=0;
     h_jiao=0,h_jiao_x=0,h_jiao6=0,h_jiao_x6=0,h_jiao_cnt=0;
     float slope=0;   //计算斜率
@@ -359,57 +421,23 @@ void median_line_extract(uint8 *src)
            huan_judge( src , i );
         }
 //环岛识别结束
-//刚入直道状态识别
-        if( Ramp_flag!=0 )
-        {
-          if(Ramp_tong==1)
-          {
-            if((Total_distance-Ramp_Len_x)>200 )   //表示先识别坡道的车
-            {
-              if((Total_distance-Ramp_Len_x)<400)
-              {
-                Ramp_flag=2;
-              }
-              else
-              {
-                Ramp_Len_x=0;
-                Ramp_flag=0;
-              }
-            }
-          }
-          else
-          {
-            if( Ramp_tong==0 )
-            {
-              if((Total_distance-Ramp_Len_x)>250 )   //表示通过无线传输识别坡道的车
-              {
-                if( (Total_distance-Ramp_Len_x)<450 )
-                {
-                  Ramp_flag=2;
-                }
-                else
-                {
-                  Ramp_Len_x=0;
-                  Ramp_flag=0;
-                }
-              }
-            }
-          }
-        }
-        if( i==69 && fiag_huan==0 && Ramp_flag==0 )  //&& Total_distance>250
+//直道和坡道状态识别
+        if( i>54 && fiag_huan==0 && Ramp_flag==0 && Total_distance>100)  //&& Total_distance>250
         {                      //&& front_car==1
 //          if(i==55)
 //          {
 //            R_wan_ru_zhi_judge();
 //            L_wan_ru_zhi_judge();
 //          }
-          zhidao( i );     //识别直道
+          if( i>54 ) podao_judge( i );  //判断坡道
+//          if( i==69 && Ramp_flag==0 ) zhidao( i );     //识别直道
         }
 
-//刚入直道状态识别结束
+//直道和坡道状态识别结束
 
 		/***************************十字边线补线*************************/
 		static uint8 shi_zi_baochi=0;
+
 		if(last_lost_count>25)
 		 {
 			if(line[0].line_case_mode==left_lose_right_normal&&line[i].line_case_mode==all_lose)		  //十字从第一行开始丢
@@ -420,7 +448,7 @@ void median_line_extract(uint8 *src)
 			 {
 				line[i].left_line=line[0].left_line+1;
 			 }
-			if(line[0].line_case_mode==all_lose&&line[i].road_wide-distance[i]>20)
+			if(line[0].line_case_mode==all_lose&&line[i].road_wide-distance[i]>20)                            //十字从第一行就全丢
 			 {
 				line[i].left_line=64-distance[i]/2;
 				line[i].right_line=64+distance[i]/2;
@@ -445,6 +473,7 @@ void median_line_extract(uint8 *src)
 			shi_zi_flag=0;
 			never_shi_zi_count=0;
 		 }
+
 		//5.赛道宽度处理
         wide[i]=line[i].right_line-line[i].left_line;     //如果补线了 宽度不是最新的 Dwide 有误
         real_wide[i]=wide[i]*X_change[69-i];              //从最底下处理，矫正表是从上面到下面排列的
@@ -474,30 +503,8 @@ void median_line_extract(uint8 *src)
             right_Sabc[2] =(line[i-2].right_line- line[i-3].right_line)*2-(line[i-1].right_line- line[i-3].right_line);
 		    //7.补线 拐点 赛道宽度变化比较大 十字
 		    D_wide_add=D_real_wide[i]+D_real_wide[i-1];
-//			if(D_wide[i]>=0 &&D_wide_add>2.2/*&& left_point[i-1].state!=LOSE && right_point[i-1].state!=LOSE*/)
-//			{
-//				if(/*right_Sabc[0]>-3&& right_Sabc[0]<=0 */(left_Sabc[0]>=1||right_Sabc[0]==0)&&(D_left[i-1]+D_left[i-2]+D_left[i-3])>=0)
-//				{
-//					if(i<65)
-//						line[i].left_line=line[i-3].left_line *(float)(X_change[69-i-3]/X_change[69-i]);
-//					else
-//						line[i].left_line=line[i-1].left_line;
-//				}
-//				if(/*left_Sabc[0]<3 &&left_Sabc[0]>=0 */(right_Sabc[0]<=-1||left_Sabc[0]==0)&& (D_right[i-1]+D_right[i-2]+D_right[i-3])<=0)
-//				{
-//					if(i<65)
-//						line[i].right_line=127-(127-line[i-3].right_line) *(float)(X_change[69-i-3]/X_change[69-i]);
-//					else
-//						line[i].right_line=line[i-1].right_line;
-//				}
-//				wide[i]=line[i].right_line-line[i].left_line;
-//				real_wide[i]=wide[i]*X_change[69-i];                     //十字左右丢线会影响坡道计算 需重新计算real、wide
-//				D_wide[i]=wide[i]-wide[i-1];
-//				D_real_wide[i]=real_wide[i]-real_wide[i-1];              //将所有的微分项全部重新计算，左右线都改变了
-//				D_left[i]=line[i].left_line-line[i-1].left_line;
-//				D_right[i]=line[i].right_line-line[i-1].right_line;
-//			}
         }
+
          if(i>3&&single_in==0)     //找拐点  就是类似于一个直角的尖
          {
             if(line[i-1].left_line>5
@@ -589,50 +596,25 @@ void median_line_extract(uint8 *src)
 
 		/*保存上一次的左右边线*/                      //每一帧的左右边线值都保存到下一帧 作为一定的参考
         last_left_point[i]=line[i].left_line;
-		last_right_point[i]=line[i].right_line;
-		last_mid_point[i]=line[i].mid_line_new;
+        last_right_point[i]=line[i].right_line;
+        last_mid_point[i]=line[i].mid_line_new;
 
-        if(line[i].mid_line_new<0)                //这个限幅值得深究
-         {
-            line[i].mid_line_new=0;
-         }
-        if(line[i].mid_line_new>129)
-         {
-            line[i].mid_line_new=129;
-         }
+        if(line[i].mid_line_new<0)      line[i].mid_line_new=0;       //这个限幅值得深究
+        if(line[i].mid_line_new>129)    line[i].mid_line_new=129;
 
-        /*十字走椭圆是因为有部分中线会在右边界的右边*/
-//		if(i>50&&(line[i].mid_line_new-line[i-1].right_line>1||line[i].mid_line_new-line[i-2].right_line>1))
-//			line[i].mid_line_new=255;
-		/*保存中线点，计算斜率*/
-		X_point[i]=line[i].mid_line_new;    //这里的i是从零计算起的
-		Y_point[i]=i;
-
-        if(last_mid<6)
-         {
-            last_mid=6;
-         }
-        if(last_mid>120)
-         {
-            last_mid=120;
-         }
-        if(last_mid_first<3)
-         {
-            last_mid_first=3;
-         }
-        if(last_mid_first>125)
-         {
-           last_mid_first=125;
-         }
-        //对宽度进行累加
+        if(last_mid<6)          last_mid=6;
+        if(last_mid>120)        last_mid=120;
+        if(last_mid_first<3)    last_mid_first=3;
+        if(last_mid_first>125)  last_mid_first=125;
 
         //环道截至有效行
-        if( follow_huan )  //1为寻左线，0为寻右线
+        if( fiag_huan )
         {
-          if( fiag_huan )
+          if( follow_huan )  //1为寻左线，0为寻右线
           {
-            if(  i>30
-               &&( (abs(line[i].left_line_unrepiar-line[i-1].left_line_unrepiar)>15) || line[i].left_line_unrepiar==128 || line[i].left_line_unrepiar==127 )
+            if(i>30
+               &&( line[i].left_line_unrepiar>113 && line[i].right_line_state==lose
+                  || (abs(line[i].left_line_unrepiar-line[i-1].left_line_unrepiar)>30) )
                  )
             {                                                                                                                                //|| line[i].left_line_unrepiar== line[i].right_line_unrepiar
               used_length=i;
@@ -640,13 +622,11 @@ void median_line_extract(uint8 *src)
               return;
             }
           }
-        }
-        else
-        {
-          if( fiag_huan )
+          else
           {
-            if(  i>30
-               &&( (abs(line[i].right_line_unrepiar-line[i-1].right_line_unrepiar)>15) || line[i].right_line_unrepiar==0 || line[i].right_line_unrepiar==1 )
+            if( i>30
+               && ( line[i].right_line_unrepiar<15 && line[i].left_line_state==lose
+                   || (abs(line[i].right_line_unrepiar-line[i-1].right_line_unrepiar)>30) )
                  )
             {                                                                                                                             //|| line[i].left_line_unrepiar== line[i].right_line_unrepiar
               used_length=i;
@@ -655,34 +635,27 @@ void median_line_extract(uint8 *src)
             }
           }
         }
-
-        if(((ABS(line[i].right_line_unrepiar-line[i-1].right_line_unrepiar)>10)||(ABS(line[i].left_line_unrepiar-line[i-1].left_line_unrepiar)>10))&&i>40 && bujiezhi==0)
-        {
-          used_length=i;
-          line[used_length].mid_line_new=255;
-          return;
-        }
-        if(*(pimg+last_mid)==0 && bujiezhi==0)
-        {
-          used_length=i;
-          line[used_length].mid_line_new=255;
-          return;
-        }
+        //坡道截至有效行
         if( Ramp_flag==1 && i>=30)
         {
           used_length=30;
           line[used_length].mid_line_new=255;
           return;
         }
+        //普通情况的有效行截止
+        if(*(pimg+last_mid)==0 && bujiezhi==0)
+        {
+          used_length=i;
+          line[used_length].mid_line_new=255;
+          return;
+        }
         if(((line[i].right_line-line[i].left_line)<15)&&i>=20 && bujiezhi==0 )      //计算出有效行
-         {                                               //加上这个判断，不然起跑线很有问题 数据会被有效行截断
-				used_length=i;
-				line[used_length].mid_line_new=255; 	 //记好了这里有效行的中值给的255，在其它地方会用到	255是不能在小液晶上显示的
-				DD_mid_line_add=temp_dd_mid_line_add;
-				temp_dd_mid_line_add=0;
-            return;                                  //跳出本次循环
-         }
-         used_length=70;
+        {                                               //加上这个判断，不然起跑线很有问题 数据会被有效行截断
+          used_length=i;
+          line[used_length].mid_line_new=255; 	 //记好了这里有效行的中值给的255，在其它地方会用到	255是不能在小液晶上显示的
+          return;                                  //跳出本次循环
+        }
+        used_length=70;
 
  }
 }
@@ -836,38 +809,67 @@ if(*(src+last_mid)==255)                    //中点为白色
 
 //-------------------------------------------------
 //                   环道标记变量处理
-//输入
-//输出
 //功能 环道已经识别，用这个函数取代环道正好识别时的记录标志等处理
 //--------------------------------------------------
 void huan_mark_start()
 {
   fiag_huan=1;
-  add_count(hehe,200);
+  add_count(hehe,200);   //记录环道识别次数
   //car_stop(1);
-  //            tongbu[3]=1;
-  if(var3==0  //加这个条件是为了让前车识别超车标志，开始超车（且不让后车再进入）
+  if(  fiag_huan_yu==0  //加这个条件是为了让前车识别超车标志，开始超车（且不让后车再进入）
      && chao_huan==0    //为了前车只发送一次切换标志，防止停车的时候一直符合条件一直切换，超车完成之后清除标志
        )   //&& sequence==1
   {
-    add_count(cut_1,200);
-    chao_huan=1;
+    if( huan_chao_cont==1 && (chao_cnt_total<=chao_car_cnt_set) )
+    {
+      add_count(cut_1,200);
+      chao_huan=1;
+      fiag_huan_yu=1;
+    }
 
-    var3=1;         //并且环道切换标志同步（表示正在切换，切换完成后清零）
-    updata_var(VAR3);
-    tongbu[3]=10;
-
-    if(var1==1) var1=0;   //在这切换前后车
-    else var1=1;
-    updata_var(VAR1);
-    tongbu[1]=10;
+    if( follow_huan_set[hehe]==1 )
+    {
+      if(chao_cnt_total<=chao_car_cnt_set)
+      {
+        follow_huan=1;                  //本车寻左线
+        uart_putchar(UART3,huan_right); //另一个车寻右线
+        add_count(chao_cnt_total,200);  //记录总超车次数
+      }
+      else
+      {
+        follow_huan=1;                  //本车寻左线
+        uart_putchar(UART3,huan_left); //另一个车也寻左线
+      }
+    }
+    else if( follow_huan_set[hehe]==2 )
+    {
+      follow_huan=1;                  //本车寻左线
+      uart_putchar(UART3,huan_left);  //另一个车寻左线
+    }
+    else if( follow_huan_set[hehe]==3 )
+    {
+      follow_huan=0;                  //本车寻右线
+      uart_putchar(UART3,huan_right); //另一个车寻右线
+    }
+    else
+    {
+      if(chao_cnt_total<=chao_car_cnt_set)
+      {
+        follow_huan=0;                  //本车寻右线
+        uart_putchar(UART3,huan_left);  //另一个车寻左线
+        add_count(chao_cnt_total,200);  //记录总超车次数
+      }
+      else
+      {
+        follow_huan=0;                  //本车寻右线
+        uart_putchar(UART3,huan_right);  //另一个车也寻右线
+      }
+    }
   }
 }
 
 //-------------------------------------------------
 //                   环道清标记变量处理
-//输入
-//输出
 //功能 环道结束之后，用这个函数取代出环道时的清楚标志等处理
 //--------------------------------------------------
 void huan_mark_end()
@@ -875,13 +877,20 @@ void huan_mark_end()
   xia_no = 0;
   all_normal_count_huan=0;
   fiag_huan=0;
-  //&& sequence==0
-  if(front_car==1 && var3==1  && chao_huan==0 )   //超车完成后的前车出去的时候将环道超车标志清零并同步给后车，让后车出来
+
+  //&& sequence==0                                                         //&& fiag_huan_yu==1
+  if( follow_huan_set[hehe]!=2 && follow_huan_set[hehe]!=3 && chao_huan==0  )   //超车完成后的前车出去的时候将环道超车标志清零并同步给后车，让后车出来
   {   //                       防止前车刚停下还未被超车就清除超车标志了，可以把速度变为其他单独的标志
-    var3=0;
-    updata_var(VAR3);
-    tongbu[3]=10;
+    uart_putchar(UART3,huan_finish);
+
+    if(huan_chao_cont==1 && (chao_cnt_total<=chao_car_cnt_set) )
+    {
+      uart_putchar(UART3,turn_car);
+      if(front_car==1)  front_car=0;
+      else front_car=1;
+    }
   }
+  fiag_huan_yu=0;
 }
 
 //-------------------------------------------------
@@ -892,10 +901,12 @@ void huan_mark_end()
 //--------------------------------------------------
 void huan_judge( uint8 *src ,uint8 i )
 {
-           uint8 tmpsrc,j;
+           int16 tmpsrc,pian_src;
+           uint8 j;
            uint8  *pimg1;
 
-          uint8 zuo=0,you=0,zuo_x=0,you_x=0,zuo1=0,you1=0,you2_x=0,you2=0,zuo2=0,zuo2_x=0,zhong2=0,zhong2_x=0;
+          uint8 zuo=0,you=0,zuo1=0,you1=0,you2=0,zuo2=0,zhong2=0;
+          int16 zuo_x=0,you_x=0, you2_x=0,zuo2_x=0,zhong2_x=0;
 //--1--//   -----判断环道前的直道-----------------------------
           if( i<10 && budiu==0)  //进入环道之前是直道
           {
@@ -927,11 +938,11 @@ void huan_judge( uint8 *src ,uint8 i )
               }
             }
 //--3--//   -----变宽之后能找到类似直角的尖-----------------------------
-            if( huan_kuan==1)     //找拐点  就是类似于一个直角的尖
+            if( huan_kuan==1 && i>40)     //找拐点  就是类似于一个直角的尖
             {
               for(j=8;j<40;j++)
               {
-                if(j<35 && line[j].left_line_unrepiar>3
+                if(j<35 && line[j].left_line_unrepiar>3  && fiag_huan_l==0
                    &&  line[j].left_line_unrepiar<line[j-2].left_line_unrepiar
                      && (line[j-6].left_line_unrepiar>=line[j-8].left_line_unrepiar)
                        )
@@ -939,7 +950,7 @@ void huan_judge( uint8 *src ,uint8 i )
                   fiag_huan_l=1;
                   huan_l_x=j;
                 }
-                if(j<35 && line[j].right_line_unrepiar<125
+                if(j<35 && line[j].right_line_unrepiar<125 && fiag_huan_r==0
                    &&  line[j].right_line_unrepiar>line[j-2].right_line_unrepiar
                      && (line[j-6].right_line_unrepiar<=line[j-8].right_line_unrepiar) )
                 {
@@ -995,9 +1006,9 @@ void huan_judge( uint8 *src ,uint8 i )
             uint8 X_buff[69],Y_buff[69],f;
 //--4--//   -----找到尖角之后根据正常图像的斜率向上寻找中心圆环---------------
             //////////////////////  只有一个尖角时环道中心圆环的识别
-            if(huan_kuan==1 && (huan_kuan1_r==1 || huan_kuan1_l==1) )
+            if( huan_kuan==1 && (huan_kuan1_r==1 || huan_kuan1_l==1) )
             {
-              for(j=huan_loca+5;j<55;j++)
+              for(j=huan_loca+5;j<65;j++)
               {
 
                 if( huan_kuan1_r==1 )
@@ -1013,18 +1024,30 @@ void huan_judge( uint8 *src ,uint8 i )
                   }
                   Regression_cal(X_buff,Y_buff,huan_loca-4);
                   //找右
-                  tmpsrc=*(pimg1+(uint8)(line[huan_loca-4].right_line_unrepiar + (float)(j- huan_loca)/(index_B+0.2)));  //这个点是右边直接加上去的点
+                  pian_src=(int16)(line[huan_loca-4].right_line_unrepiar-5 + (float)(j- huan_loca)/(index_B));
+                  if(pian_src<0)
+                  {
+                    pian_src=0;
+                    j=65;
+                  }
+                  tmpsrc=*(pimg1+pian_src);  //这个点是右边直接加上去的点
                   if( tmpsrc ==0  )  // src+(line_num-1-i)*128;    && (line[huan_loca].left_line_unrepiar - (j- huan_loca))>10
                   {
                     you2=1;
-                    you2_x=(uint8)(line[huan_loca-4].right_line_unrepiar + (float)(j- huan_loca)/(index_B+0.2)) ;
+                    you2_x=pian_src ;
                   }
                   //找中
-                  tmpsrc=*(pimg1+(uint8)(line[huan_loca-4].mid_line_new + (float)(j- huan_loca)/(index_B-0.2)));  //这个点是右边直接加上去的点
+                  pian_src=(int16)(line[huan_loca-4].mid_line_new + (float)(j- huan_loca)/(index_B)) ;
+                  if(pian_src<0)
+                  {
+                    pian_src=0;
+                    j=65;
+                  }
+                  tmpsrc=*(pimg1+pian_src);  //这个点是右边直接加上去的点
                   if( tmpsrc ==0  )  // src+(line_num-1-i)*128;    && (line[huan_loca].left_line_unrepiar - (j- huan_loca))>10
                   {
                     zhong2=1;
-                    zhong2_x=(uint8)(line[huan_loca-4].mid_line_new + (float)(j- huan_loca)/(index_B-0.2)) ;
+                    zhong2_x=pian_src ;
                   }
                   if( ( you2==1 && zhong2==1)  )
                   {
@@ -1067,20 +1090,22 @@ void huan_judge( uint8 *src ,uint8 i )
                     }
                     Regression_cal(X_buff,Y_buff,huan_loca-4);
                     //zhao左
-                    tmpsrc=*(pimg1+(uint8)(line[huan_loca-4].left_line_unrepiar + (float)(j- huan_loca)/(index_B-0.2)));  //这个点是右边直接加上去的点
-
-                    //                    tmpsrc=*(pimg1+line[huan_loca].left_line_unrepiar + (j- huan_loca));
+                    pian_src=(int16)(line[huan_loca-4].left_line_unrepiar+5 + (float)(j- huan_loca)/(index_B));
+                    if(pian_src<0) pian_src=0;
+                    tmpsrc=*(pimg1+pian_src);  //这个点是右边直接加上去的点
                     if( tmpsrc ==0 )  // src+(line_num-1-i)*128;
                     {
                       zuo2=1;
-                      zuo2_x=(uint8)(line[huan_loca-4].left_line_unrepiar + (float)(j- huan_loca)/(index_B-0.2)) ;
+                      zuo2_x=pian_src ;
                     }
                     //找中
-                    tmpsrc=*(pimg1+(uint8)(line[huan_loca-4].mid_line_new + (float)(j- huan_loca)/(index_B+0.2)));  //这个点是右边直接加上去的点
+                    pian_src=(int16)(line[huan_loca-4].mid_line_new + (float)(j- huan_loca)/(index_B));
+                    if(pian_src<0) pian_src=0;
+                    tmpsrc=*(pimg1+pian_src);  //这个点是右边直接加上去的点
                     if( tmpsrc ==0  )  // src+(line_num-1-i)*128;    && (line[huan_loca].left_line_unrepiar - (j- huan_loca))>10
                     {
                       zhong2=1;
-                      zhong2_x=(uint8)(line[huan_loca-4].mid_line_new + (float)(j- huan_loca)/(index_B+0.2)) ;
+                      zhong2_x=pian_src ;
                     }
                     if( ( zuo2==1 && zhong2==1)  )
                     {
@@ -1118,40 +1143,45 @@ void huan_judge( uint8 *src ,uint8 i )
             //////////////////////  环道中心圆环的识别
             if(huan_kuan==2)
             {
-              for(j=20;j<55;j++)
+              uint8 xun_wei=0;
+              if(huan_l_x<huan_r_x) xun_wei=huan_r_x+2;  //从最高的尖角处开始往上巡线
+              else xun_wei=huan_l_x+2;
+              for(j=xun_wei;j<65;j++)
               {
                 zuo1=0,zuo_x=0,you1=0,you_x=0;
                 pimg1=src+(line_num-1-j)*128;
-                                    //计算斜率
-                    for(f=0;f<huan_l_x;f++)
-                    {
+                //计算斜率
+                for(f=0;f<huan_l_x;f++)
+                {
                       X_buff[f]=line[f].left_line_unrepiar;
                       Y_buff[f]=f;
-                    }
-                    Regression_cal(X_buff,Y_buff,huan_l_x-4);
-                    //zhao左
-                    tmpsrc=*(pimg1+(uint8)(line[huan_l_x-4].left_line_unrepiar + (float)(j- huan_l_x)/(index_B-0.2)));  //这个点是右边直接加上去的点
-
-                    //                    tmpsrc=*(pimg1+line[huan_loca].left_line_unrepiar + (j- huan_loca));
-                    if( tmpsrc ==0 && j>(huan_l_x+5))  // src+(line_num-1-i)*128;
-                    {
-                      zuo1=1;
-                      zuo_x=(uint8)(line[huan_l_x-4].left_line_unrepiar + (float)(j- huan_l_x)/(index_B-0.2)) ;
-                    }
-                                  //计算斜率
-                  for(f=0;f<huan_r_x;f++)
-                  {
-                    X_buff[f]=line[f].right_line_unrepiar;
-                    Y_buff[f]=f;
-                  }
-                  Regression_cal(X_buff,Y_buff,huan_r_x-4);
-                  //找右
-                  tmpsrc=*(pimg1+(uint8)(line[huan_r_x-4].right_line_unrepiar + (float)(j- huan_r_x)/(index_B+0.2)));  //这个点是右边直接加上去的点
-                  if( tmpsrc ==0 && j>(huan_r_x+5) )  // src+(line_num-1-i)*128;    && (line[huan_loca].left_line_unrepiar - (j- huan_loca))>10
-                  {
-                    you1=1;
-                    you_x=(uint8)(line[huan_r_x-4].right_line_unrepiar + (float)(j- huan_r_x)/(index_B+0.2)) ;
-                  }
+                }
+                Regression_cal(X_buff,Y_buff,huan_l_x-4);
+                //zhao左
+                pian_src=(int16)(line[huan_l_x-4].left_line_unrepiar+5 + (float)(j- huan_l_x)/(index_B));
+                if(pian_src<0) pian_src=0;
+                tmpsrc=*(pimg1+pian_src);  //这个点是右边直接加上去的点
+                if( tmpsrc ==0 && j>(huan_l_x+5))  // src+(line_num-1-i)*128;
+                {
+                  zuo1=1;
+                  zuo_x=pian_src ;
+                }
+                //计算斜率
+                for(f=0;f<huan_r_x;f++)
+                {
+                  X_buff[f]=line[f].right_line_unrepiar;
+                  Y_buff[f]=f;
+                }
+                Regression_cal(X_buff,Y_buff,huan_r_x-4);
+                //找右
+                pian_src=(int16)(line[huan_r_x-4].right_line_unrepiar-5 + (float)(j- huan_r_x)/(index_B));
+                if(pian_src<0) pian_src=0;
+                tmpsrc=*(pimg1+pian_src);  //这个点是右边直接加上去的点
+                if( tmpsrc ==0 && j>(huan_r_x+5) )  // src+(line_num-1-i)*128;    && (line[huan_loca].left_line_unrepiar - (j- huan_loca))>10
+                {
+                  you1=1;
+                  you_x=pian_src ;
+                }
 
                 if(zuo1==1 && you1==1 )
                 {
@@ -1225,6 +1255,7 @@ void huan_clear( uint8 i )
          if( xia_no==1  && i>20 && i<40
             &&  line[i].left_line_state== normal &&(line[i].left_line_unrepiar > line[i-2].left_line_unrepiar  )
               &&  line[i-3].left_line_state== normal &&(line[i-2].left_line_unrepiar > line[i-4].left_line_unrepiar  )
+                && line[i].left_line_unrepiar<64
                 )   // 先找尖角前半部分
          {
            h_jiao=1;
@@ -1234,11 +1265,14 @@ void huan_clear( uint8 i )
             && line[i].left_line_state== normal &&(line[i].left_line_unrepiar < line[i-2].left_line_unrepiar  )
               && line[i-3].left_line_state== normal &&(line[i-2].left_line_unrepiar < line[i-4].left_line_unrepiar  )
                 && line[i-6].left_line_state== normal &&(line[i-4].left_line_unrepiar < line[i-6].left_line_unrepiar  )
+                  && line[i-6].left_line_unrepiar<96
                   )      //再找尖角后半部分
          {
            xia_no=2;       // 都找到则识别为尖角 ，前车停车
            h_jiao_cnt=1;   //每次都只识别一次尖角
-           if(chao_huan==1 && var3==1 && huan_chao_cont==1)      //&& sequence==1
+           if(chao_huan==1 && huan_chao_cont==1
+              && follow_huan_set[hehe]!=2 && follow_huan_set[hehe]!=3
+                )      //&& sequence==1
            {
              speedwantD=0;
              speedwantE=0;
@@ -1270,7 +1304,7 @@ void huan_clear( uint8 i )
        }
        else
        {
-//--1--（寻右）先找到入环道尖角后的特征（右边丢线）
+//--1--（寻右）先找到入环道尖角后的特征（zuo边丢线）
          if( i==10 && xia_no==0  && line[i].left_line_state== lose && line[i-8].left_line_state== lose
             &&(line[i].right_line_unrepiar > line[i-2].right_line_unrepiar ||  line[i-2].right_line_unrepiar >120 )
                &&(line[i-2].right_line_unrepiar > line[i-4].right_line_unrepiar ||  line[i-4].right_line_unrepiar >120 )
@@ -1282,7 +1316,8 @@ void huan_clear( uint8 i )
          if( xia_no==1  && i>20 && i<40
             &&  line[i].right_line_state== normal &&(line[i].right_line_unrepiar < line[i-2].right_line_unrepiar  )
               &&  line[i-3].right_line_state== normal &&(line[i-2].right_line_unrepiar < line[i-4].right_line_unrepiar  )
-                )   // 先找尖角前半部分
+                && line[i].right_line_unrepiar>64
+                )   // 先找尖角前半部分--即右边线逐渐减小
          {
            h_jiao=1;
            h_jiao_x=i;
@@ -1291,11 +1326,14 @@ void huan_clear( uint8 i )
             && line[i].right_line_state== normal &&(line[i].right_line_unrepiar > line[i-2].right_line_unrepiar  )
               && line[i-3].right_line_state== normal &&(line[i-2].right_line_unrepiar > line[i-4].right_line_unrepiar  )
                 && line[i-6].right_line_state== normal &&(line[i-4].right_line_unrepiar > line[i-6].right_line_unrepiar  )
-                  )      //再找尖角后半部分
+                  && line[i-6].right_line_unrepiar>32
+                  )      //再找尖角后半部分--即右边线逐渐增大
          {
            xia_no=2;       // 都找到则识别为尖角 ，前车停车
            h_jiao_cnt=1;   //每次都只识别一次尖角
-           if(chao_huan==1 && var3==1  && huan_chao_cont==1)      //&& sequence==1
+           if(chao_huan==1 && huan_chao_cont==1
+              && follow_huan_set[hehe]!=2 && follow_huan_set[hehe]!=3
+                )      //&& sequence==1
            {
              speedwantD=0;
              speedwantE=0;
@@ -1391,29 +1429,41 @@ void huan_along( uint8 i )
       }
       else if(line[i].left_line_state==lose ) //如果没有正常的右线，也找不到左线就直接给定中线
       {
-        line[i].left_line=0;
-        line[i].right_line=64;
+        if(i<11 && (lost_count>7 || left_lost_count>7))
+        {
+          huan_buxian_biger=1;
+        }
+        if( xia_no==4 && huan_buxian_biger==1 )
+        {
+          line[i].left_line=0;
+          line[i].right_line=32;
+        }
+        else
+        {
+          line[i].left_line=0;
+          line[i].right_line=64;
+        }
         line[i].mid_line_new= (line[i].left_line+ line[i].right_line)/2;
       }
       else   // 有正常左边线，没有正常右边线的情况，根据左线补右线
       {
         if(i<10)
         {
-        line[i].left_line  = line[i].left_line_unrepiar;
-        line[i].right_line = line[i].left_line_unrepiar+distance2[i];
-        line[i].mid_line_new= (line[i].left_line+ line[i].right_line)/2;
+          line[i].left_line  = line[i].left_line_unrepiar;
+          line[i].right_line = line[i].left_line_unrepiar+distance2[i];
+          line[i].mid_line_new= (line[i].left_line+ line[i].right_line)/2;
         }
         else
         {
-        line[i].left_line  = line[i].left_line_unrepiar;
-        line[i].mid_line_new=line[i-1].mid_line_new+(line[i].left_line-line[i-1].left_line);
+          line[i].left_line  = line[i].left_line_unrepiar;
+          line[i].mid_line_new=line[i-1].mid_line_new+(line[i].left_line-line[i-1].left_line);
         }
        }
     }
     else    //寻右线
     {
       if(line[i].left_line_unrepiar<line[i].right_line_unrepiar && line[i].left_line_state==normal       // 如果能找到正常的左线
-         && (line[i].left_line_unrepiar+distance2[i]+10) > line[i].right_line_unrepiar
+         && (line[i].left_line_unrepiar+distance2[i]+10) > line[i].right_line_unrepiar                   // 赛道变宽的部分只用右边线
              )
       {
         if(line[i].right_line_state==normal)   //如果有右线就直接用左右边线
@@ -1439,8 +1489,20 @@ void huan_along( uint8 i )
       }
       else if(line[i].right_line_state==lose ) //如果没有正常的左线，也找不到右线就直接给定中线
       {
-        line[i].left_line=64;
-        line[i].right_line=128;
+        if(i<11 && (lost_count>7 || right_lost_count>7))
+        {
+          huan_buxian_biger=1;
+        }
+        if( xia_no==4 && huan_buxian_biger==1 )
+        {
+          line[i].left_line=96;
+          line[i].right_line=128;
+        }
+        else
+        {
+          line[i].left_line=64;
+          line[i].right_line=128;
+        }
         line[i].mid_line_new= (line[i].left_line+ line[i].right_line)/2;
       }
       else   // 有正常右边线，没有正常左边线的情况，根据右线补左线 （最常见）
@@ -1464,8 +1526,6 @@ void huan_along( uint8 i )
 
 //-------------------------------------------------
 //                   直道
-//输入
-//输出
 //功能    判断直道
 //--------------------------------------------------
 void zhidao( uint8 i )
@@ -1502,12 +1562,7 @@ void zhidao( uint8 i )
     if( po_wide_av>75) //平均宽度大于一定值时认为是坡道
     {
         Ramp_flag=1;
-        Ramp_Len_x=Total_distance;
-
-        var3=2;         //等于2表示坡道同步两车坡道标志
-        updata_var(VAR3);
-        tongbu[3]=10;
-        Ramp_tong=1;
+//        Ramp_tong=1;
 
         add_count(cut_2,200);
 //        chao_zhi=0;
@@ -1515,9 +1570,9 @@ void zhidao( uint8 i )
 //        L_wrz_flag=0;
 //        R_wrz_flag=0;
 //
-        var4=0;         //并且环道切换标志同步（表示正在切换，切换完成后清零）
-        updata_var(VAR4);
-        tongbu[4]=10;
+//        var4=0;         //并且环道切换标志同步（表示正在切换，切换完成后清零）
+//        updata_var(VAR4);
+//        tongbu[4]=10;
 
 //        car_stop(1);
     }
@@ -1533,11 +1588,11 @@ void zhidao( uint8 i )
                )
     {
         Ramp_flag=1;
-        Ramp_Len_x=Total_distance;
+//        Ramp_Len_x=Total_distance;
 
-        var3=2;         //等于2表示坡道同步两车坡道标志
-        updata_var(VAR3);
-        tongbu[3]=10;
+//        var3=2;         //等于2表示坡道同步两车坡道标志
+//        updata_var(VAR3);
+//        tongbu[3]=10;
         Ramp_tong=1;
 
         add_count(cut_2,200);
@@ -1547,9 +1602,9 @@ void zhidao( uint8 i )
 //        L_wrz_flag=0;
 //        R_wrz_flag=0;
 
-        var4=0;         //并且环道切换标志同步（表示正在切换，切换完成后清零）
-        updata_var(VAR4);
-        tongbu[4]=10;
+//        var4=0;         //并且环道切换标志同步（表示正在切换，切换完成后清零）
+//        updata_var(VAR4);
+//        tongbu[4]=10;
 
 //        car_stop(1);
     }
@@ -1558,21 +1613,104 @@ void zhidao( uint8 i )
       if( (line[69].left_line_unrepiar-line[0].left_line_unrepiar)>(line[0].right_line_unrepiar-line[69].right_line_unrepiar) )
       {
         chao_zhi=1;
-        R_wrz_flag=1;
+        R_wrz_flag=1;          //本车靠右停
         zhidao_normal_cut=0;
-//        car_stop(1);
+        uart_putchar(UART3,ZC_left);   //另一个车左侧超车
+        speedwantD=40;
+        speedwantE=40;
       }
       else
       {
         chao_zhi=1;
-        L_wrz_flag=1;
+        L_wrz_flag=1;          //本车靠左停
         zhidao_normal_cut=0;
-//        car_stop(1);
+        uart_putchar(UART3,ZC_right);  //另一个车右侧超车
+        speedwantD=40;
+        speedwantE=40;
       }
     }
   }
 }
- /*
+
+//-------------------------------------------------
+//                   坡道
+//功能    判断坡道
+//--------------------------------------------------
+void podao_judge( uint8 i )
+{
+  uint8 j;
+  uint8 zhidao_normal_cut=0,zhidao_normal_cut1=0;
+  uint16 po_wide_num=0,po_wide_add=0,po_wide_av=0;
+  //--1--近处识别坡道
+  if( used_length>=60 )
+    for(j=0;j<60;j++)
+    {
+      if( (line[j].left_line_unrepiar >= line[0].left_line_unrepiar)
+       &&(line[j].left_line_unrepiar <= line[59].left_line_unrepiar)
+         &&(line[j].right_line_unrepiar <= line[0].right_line_unrepiar)
+           &&(line[j].right_line_unrepiar >= line[59].right_line_unrepiar) )
+      {
+          zhidao_normal_cut++;
+      }
+      if( (line[j].left_line_unrepiar >= line[j-1].left_line_unrepiar)
+            &&(line[j].right_line_unrepiar <= line[j-1].right_line_unrepiar) )
+      {
+        if(j<5) zhidao_normal_cut1++;
+        else if(line[j].line_case_mode==all_normal) zhidao_normal_cut1++;
+      }
+    }
+  if( zhidao_normal_cut>56 && zhidao_normal_cut1>=54 )
+  {
+    //先计算第15行到50行的平均赛道宽度
+    for(j=15;j<50;j++)
+    {
+      po_wide_num+=line[j].road_wide;
+      po_wide_add++;
+    }
+    po_wide_av=po_wide_num/po_wide_add;
+    if( po_wide_av>80) //平均宽度大于一定值时认为是坡道
+    {
+        Ramp_flag=1;
+        uart_putchar(UART3,Ramp);
+        add_count(cut_2,200);
+    }
+  }
+//  //--2--远处识别坡道
+//  if( used_length>68 )
+//    for(j=0;j<69;j++)
+//    {
+//      if( (line[j].left_line_unrepiar >= line[0].left_line_unrepiar)
+//       &&(line[j].left_line_unrepiar <= line[68].left_line_unrepiar)
+//         &&(line[j].right_line_unrepiar <= line[0].right_line_unrepiar)
+//           &&(line[j].right_line_unrepiar >= line[68].right_line_unrepiar) )
+//      {
+//          zhidao_normal_cut++;
+//      }
+//      if( (line[j].left_line_unrepiar >= line[j-1].left_line_unrepiar)
+//            &&(line[j].right_line_unrepiar <= line[j-1].right_line_unrepiar) )
+//      {
+//        if(j<5) zhidao_normal_cut1++;
+//        else if(line[j].line_case_mode==all_normal) zhidao_normal_cut1++;
+//      }
+//    }
+//  if( zhidao_normal_cut>66 && zhidao_normal_cut1>=65 && Ramp_flag==0)   //下坡阶段不在远处识别坡道，距离控制不准容易下坡再此判断坡道
+//  {
+//    if( abs(po_road_wide_down[0][0]-po_road_wide_down[0][3])<2
+//       && (po_road_wide_up[0][0]-po_road_wide_up[0][3])>=3
+//         &&  abs(po_road_wide_down[1][0]-po_road_wide_down[1][3])<2
+//           && (po_road_wide_up[1][0]-po_road_wide_up[1][3])>=3
+//             && (abs(line[9].left_line_unrepiar - line[0].left_line_unrepiar)-abs(line[69].left_line_unrepiar - line[60].left_line_unrepiar))>=1
+//               && (abs(line[0].right_line_unrepiar - line[9].right_line_unrepiar)-abs(line[60].right_line_unrepiar - line[69].right_line_unrepiar))>=1
+//               )
+//    {
+//        Ramp_flag=1;
+//        uart_putchar(UART3,Ramp);
+//        add_count(cut_2,200);
+//    }
+//  }
+}
+
+/*
 //--------------------------------------------------
 //                   直道
 //输入
@@ -1714,7 +1852,7 @@ void start_line(uint8 *src)
 
   static uint8 white_to_black_num;
   static uint8 black_to_white_num;
-  static uint8 qpxian,a;
+  static uint8 qpxian;
 
   //清零
   qpxian = 0;
@@ -1746,9 +1884,8 @@ void start_line(uint8 *src)
       stop = 1;
       bujiezhi = 1;
     }
-   if(stop == 1 && System_time>=8 && a==0)
+   if(stop == 1 && System_time>=8 )
    {
-     a++;
      start_line_stop();
    }
 
@@ -1763,8 +1900,10 @@ void start_line(uint8 *src)
  */
 void start_line_stop()
 {
-  if(speedwant >= 120)            //速度比较大，延时20ms
+  static uint8 a=0;
+  if(speedwant >= 120 && a==0)            //速度比较大，延时20ms
   {
+    a++;
     flag_key_select=0;
     flag_key_l_u_5=0;
 
@@ -1775,8 +1914,9 @@ void start_line_stop()
   {
     if( s_distance<550 && s_distance>10 )
     {
-      if(stop_count > 15)
+      if(stop_count > 15 && a==0)
       {
+        a++;
         flag_key_select=0;
         flag_key_l_u_5=0;
 
@@ -1785,8 +1925,9 @@ void start_line_stop()
       }
     }
     else
-      if(stop_count > 40)
+      if(stop_count > 40 && a==0)
       {
+        a++;
         flag_key_select=0;
         flag_key_l_u_5=0;
         car_stop( 1 );
@@ -1799,7 +1940,6 @@ void start_line_stop()
 //-------------------------------------------------
 //功能    判断右弯道进入直道
 //--------------------------------------------------
-
 void R_wan_ru_zhi_judge()
 {
   uint8 j;
@@ -1933,15 +2073,14 @@ void L_wan_ru_zhi_judge()
 //--------------------------------------------------
 uint8 origin_chao( uint8 cut )
 {
-  static uint8 z=0,h=0;
+  static uint8 z=0;
   uint8 mid=64;
   if(Total_distance<170   //发车前两米内，一个车靠左一个车靠右
-     && var4==1 )    // 只有在超车未完成的时候在进入
+      )    // 只有在超车未完成的时候在进入
   {
     used_length=30;
-    if(sequence==1)   //前车靠左
+    if(front_car==1)   //前车靠左
     {
-      L_wrz_flag=3;
       if(Total_distance>30 && z==0 && chao_zhi==0)    //前车在指定位置停车    && Total_distance<35
       {
         z++;
@@ -1949,39 +2088,24 @@ uint8 origin_chao( uint8 cut )
         car_stop(1);
       }
     }
-    else              //后车靠右
-    {
-      R_wrz_flag=3;
-    }
   }
-  if(sequence==1)   //停下的车检测到超声波之后恢复正常
+  if(front_car==1)   //停下的车检测到超声波之后恢复正常
   {
-    if( (road_count_chao>10 || ( leftval==0 && rightval==0 && s_distance<550 && s_distance>10))&& chao_zhi==1 && h==0)    //前车停车等待超车完成时若超声波能检测到数据，证明超车完成
+    if( s_distance<550 && s_distance>10 && chao_zhi==1 )    //前车停车等待超车完成时若超声波能检测到数据，证明超车完成
     {
+      z=0;
       chao_zhi=0;
-      h++;
       L_wrz_flag=0;
 
-      var4=0;         //并且环道切换标志同步（表示正在切换，切换完成后清零）
-      updata_var(VAR4);
-      tongbu[4]=10;
+      uart_putchar(UART3,ZC_OK);
 
-      if(var1==1) var1=0;   //在这切换前后车
-      else var1=1;
-      updata_var(VAR1);
-      tongbu[1]=10;
+      uart_putchar(UART3,turn_car);
+      if(front_car==1)  front_car=0;
+      else front_car=1;
 
       car_start(1);
 
       mid=64;
-    }
-  }
-  else              //超过去的车接收到NRF信号之后恢复正常
-  {
-    if(var4==0)
-    {
-      mid=64;
-      R_wrz_flag=0;
     }
   }
   return mid;
@@ -1989,14 +2113,8 @@ uint8 origin_chao( uint8 cut )
 
 void zhi_chao_deal()
 {
-
   speedwantD=40;
   speedwantE=40;
-//  car_stop(1);
-//  add_count(cut_2,200);
-
-  updata_var(VAR4);
-  tongbu[4]=10;
 }
 //-------------------------------------------------
 //                   弯道进入直道时超车
@@ -2006,88 +2124,283 @@ void zhi_chao_deal()
 //--------------------------------------------------
 uint8 wrz_chao( uint8 cut )
 {
-  static uint8 z=0,h=0,a=0;
+  static uint8 z=0;
   uint8 mid=64;
 
-  if(var4==0 )     //只有先识别的前车才停下
+  if( chao_zhi==1 )     //只有先识别的前车才停下
   {
-    h=0;
-    a=0;
 //    used_length=30;
-    if((L_wrz_flag==1 || L_wrz_flag==2) && chao_zhi==1 )   //前车左弯进直道靠左停
+    if( L_wrz_flag==1 || R_wrz_flag==1 )   //前车左弯进直道靠左停
     {
-      if(wrz_distance>15 && z==0 )    //前车在指定位置停车
+      if(wrz_distance>50 && z==0 )    //前车在指定位置停车
       {
         z++;
-        var4=1;         //并且直道超车标志同步（表示正在切换，切换完成后清零）
-        zhi_chao_deal();
-      }
-    }
-    else if((R_wrz_flag==1 || R_wrz_flag==2) && chao_zhi==1 )
-    {
-      if(wrz_distance>15 && z==0 )
-      {
-        z++;
-        var4=2;         //并且直道超车标志同步（表示正在超车，超车完成后清零）
-        zhi_chao_deal();
-      }
-    }
-
-    if((L_wrz_flag==1 || L_wrz_flag==2) && chao_zhi==0 )   //后车超过去之后清直道标志
-    {
-      L_wrz_flag=0;
-    }
-    else if((R_wrz_flag==1 || R_wrz_flag==2) && chao_zhi==0 )
-    {
-      R_wrz_flag=0;
-    }
-  }
-  else
-  {
-    if(chao_zhi==1)   //停下的车
-    {
-      z=0;
-      if(wrz_distance>45)
-      {
         car_stop(1);
       }
-
-      if( ( ( leftval==0 && rightval==0 && s_distance<550 && s_distance>10)) && h==0)    //前车停车等待超车完成时若超声波能检测到数据，证明超车完成,然后向前车发数据清标志
-      {    //road_count_chao>10 ||
-        chao_zhi=0;
-        h++;
-        wrz_distance=0;
-        L_wrz_flag=0;
-        R_wrz_flag=0;
-
-        var4=0;         //并且环道切换标志同步（表示正在切换，切换完成后清零）
-        updata_var(VAR4);
-        tongbu[4]=10;
-
-        if(var1==1) var1=0;   //在这切换前后车
-        else var1=1;
-        updata_var(VAR1);
-        tongbu[1]=10;
-
-        car_start(1);
-      }
     }
-    else           //超过去的车
-    {
-      if( R_wrz_flag==0 && L_wrz_flag==0 && var4==1 && a==0 )   //后车超过去之后清直道标志
-      {
-        R_wrz_flag=1;
-        a++;
-      }
-      else if( L_wrz_flag==0 && R_wrz_flag==0 && var4==2 && a==0 )
-      {
-        L_wrz_flag=1;
-        a++;
-      }
-    }
+    if( s_distance<550 && s_distance>20 )    //前车停车等待超车完成时若超声波能检测到数据，证明超车完成,然后向前车发数据清标志
+    {    //road_count_chao>10 || leftval==0 && rightval==0 &&
+      chao_zhi=0;
+      z=0;
+      wrz_distance=0;
+      L_wrz_flag=0;
+      R_wrz_flag=0;
+      uart_putchar(UART3,ZC_OK);
+      add_count(chao_cnt_total,200);  //记录总超车次数
+      uart_putchar(UART3,turn_car);
+      if(front_car==1)  front_car=0;
+      else front_car=1;
 
+      car_start(1);
+    }
   }
 
   return mid;
 }
+
+//-------------------------------------------------
+//                   避障
+//输入
+//输出
+//功能               避障
+//--------------------------------------------------
+int8 left_tubian;
+int8 right_tubian;
+uint8 never_obstacle_flag;
+uint8 left_obstancle_flag;
+uint8 right_obstancle_flag;
+uint8 left_obstancle_acc=0;
+uint8 right_obstancle_acc=0;
+#define Traffic(x)  line[x-3].line_case_mode==all_normal && line[x-2].line_case_mode==all_normal && line[x-1].line_case_mode==all_normal && line[x].line_case_mode==all_normal && line[x+1].line_case_mode==all_normal && line[x+2].line_case_mode==all_normal && line[x+3].line_case_mode==all_normal
+#define Obstacle_Remeber obstacle_remeber[0]==0 && obstacle_remeber[1]==1 && obstacle_remeber[2]==1
+
+void avoid_obstacle(uint8 *src)
+{
+  uint8 *pimg;
+  uint8 scan[4][70];
+  uint8 first_point;
+  static uint8 obstacle_remeber[3]={0};
+  uint8 i,j,k;
+  uint8 obstacle_length,flag_obstacle;
+  uint8 flag_obstacle_l,flag_obstacle_r,flag_obstacle_m,flag_obstacle_l_pre,flag_obstacle_r_pre,flag_obstacle_m_pre;
+  static uint16 obstacle_sum=0,obstacle_delay_cnt=50;
+  float offset;
+  int8 err0,err1,err2;
+  Site_t site_obstacle={0,0};
+  uint8 jia_zhangai=0;
+  static int obstacle_left_total;
+  static int obstacle_right_total;
+  static int obstacle_left_total_2;
+  static int obstacle_right_total_2;
+  obstacle_length=0;
+  flag_obstacle=0;
+  flag_obstacle_l=0;
+  flag_obstacle_r=0;
+  /*  画出扫描线,保存扫描点，可以固定为数组  */
+  for(i=4;i<line_num;i++)
+  {
+    offset=0.5;
+    site_obstacle.y=line_num-i;
+
+    site_obstacle.x=line[0].right_line-10-(uint8)(offset*i);
+    scan[1][i]=site_obstacle.x;    //左
+
+    site_obstacle.x=line[0].left_line+10+(uint8)(offset*i);
+    scan[0][i]=site_obstacle.x;    //右
+
+  }
+
+  for(i=4;i<(used_length>666?66:used_length);i++)
+  {
+    err0=line[i-3].mid_line_new-line[i-1].mid_line_new;//跳变前的偏差
+    err1=line[i-1].mid_line_new-line[i].mid_line_new;//跳变时的偏差
+    if(ABS(err0)<5&&ABS(err1)>5&&Traffic(i)&&jia_zhangai==0)
+    {
+      first_point=i;
+      /* 确定障碍位于中线哪边 */
+      if(err1<0)
+      {
+        left_tubian=(line[i].left_line-line[i-1].left_line)/2-line[i].mid_line_new+line[i-1].mid_line_new;
+        flag_obstacle=1; //左
+        flag_obstacle_l_pre=1;
+        flag_obstacle_m_pre=0;
+        flag_obstacle_r_pre=0;
+      }
+      else
+      {
+        right_tubian=(line[i-1].right_line-line[i].right_line)/2-line[i-1].mid_line_new+line[i].mid_line_new;
+        flag_obstacle=2; //右
+        flag_obstacle_l_pre=0;
+        flag_obstacle_m_pre=0;
+        flag_obstacle_r_pre=1;
+      }
+      /* 跳变点开始确认障碍并计算长度 */
+      switch(flag_obstacle)
+      {
+      case 1:
+        {
+          for(j=i;j<used_length-4;j++)
+          {
+            pimg=src+(line_num-1-j)*128;
+
+            for(k=line[j].mid_line_new;k>line[j].mid_line_new-distance2[j]/2;k--)
+            {
+              if( *(pimg+k)==0 )
+                obstacle_left_total++;
+
+            }
+
+            for(k=line[j].mid_line_new;k<line[j].right_line_unrepiar;k++)
+            {
+              if(*(pimg+k)==255)
+                obstacle_right_total_2++;
+            }
+ /* 扫右边是否为白色，否则跳出 */
+            if(obstacle_right_total_2>2&&ABS(left_tubian)<5&&flag_obstacle_r_pre==0)
+            {
+              flag_obstacle_r=0;
+              obstacle_right_total_2=0;
+            }
+            else
+            {
+              obstacle_right_total_2=0;
+              break;
+            }
+            /* 扫中间是否为白色，否则跳出 */
+            if(((*(pimg+64)==255)||*(pimg+74)==255)&&flag_obstacle_m_pre==0)
+            {
+              flag_obstacle_m=0;
+            }
+            else
+            {
+              break;
+            }
+            /*  扫左边是否为黑色，是，计算长度，否则跳出  */
+            if(obstacle_left_total>5&&flag_obstacle_l_pre==1)
+            {
+              flag_obstacle_l=1;
+              obstacle_length=j-first_point;
+              obstacle_left_total=0;
+            }
+            else
+            {
+              obstacle_left_total=0;
+              break;
+            }
+          }
+          break;
+        }
+      case 2:
+        {
+          for(j=i;j<used_length-4;j++)
+          {
+            pimg=src+(line_num-1-j)*128;
+
+            for(k=line[j].mid_line_new;k<=line[j].mid_line_new+distance2[j]/2;k++)
+            {
+              if( *(pimg+k)==0 )
+                obstacle_right_total++;
+            }
+
+            for(k=line[j].left_line_unrepiar;k<line[j].mid_line_new;k++)
+            {
+              if(*(pimg+k)==255)
+                obstacle_left_total_2++;
+            }
+
+            /*  扫左边是否为白色，否则跳出  */
+            if( obstacle_left_total_2>2&&ABS(right_tubian)<5 && flag_obstacle_l_pre==0)
+            {
+              flag_obstacle_l=0;
+              obstacle_left_total_2=0;
+            }
+            else
+            {
+              obstacle_left_total_2=0;
+              break;
+            }
+            /*  扫中间是否为白色，否则跳出  */
+            if((*(pimg+54)==255||*(pimg+64)==255) && flag_obstacle_m_pre==0)
+            {
+              flag_obstacle_m=0;
+            }
+            else
+            {
+              break;
+            }
+            /*  扫右边是否为黑色，是，计算长度，否则跳出  */
+            if(obstacle_right_total>3&& flag_obstacle_r_pre==1)
+            {
+             flag_obstacle_r=1;
+             obstacle_length=j-first_point;
+             //obstacle_length+=obstacle_length;
+             obstacle_right_total=0;
+            }
+            else
+            {
+              obstacle_right_total=0;
+              break;
+            }
+          }
+          break;
+        }
+         default:
+           break;
+      }
+/*  如果是障碍，进行处理  */
+      static uint8 obstancle_recognize_count;
+      if(obstacle_length>5)
+      {
+        obstacle_sum++;
+        obstacle_remeber[0]=1;
+        for(j=2;j>0;j--)
+        {
+          obstacle_remeber[j]=obstacle_remeber[j-1];
+        }
+        /*  障碍处理  */
+        switch(flag_obstacle)
+        {
+        case 1:
+          obstancle_recognize_count++;
+          if(obstancle_recognize_count>=1)
+          {
+            obstancle_acc++;
+            left_obstancle_acc++;
+            left_obstancle_flag=1;
+            never_obstacle_flag=1;
+            obstancle_recognize_count=0;
+          }
+          for(j=0;j<used_length;j++)
+          {
+            line[j].mid_line_new=line[i].mid_line_new+8;
+          }
+          break;
+        case 2:
+          obstancle_recognize_count++;
+          if(obstancle_recognize_count>=1)
+          {
+            obstancle_acc++;
+            right_obstancle_acc++;
+            right_obstancle_flag=1;
+            never_obstacle_flag=1;
+            obstancle_recognize_count=0;
+          }
+          for(j=0;j<used_length;j++)
+          {
+            line[j].mid_line_new=line[i].mid_line_new-8;
+          }
+          break;
+        default:
+          break;
+        }
+      }
+    else
+    {
+      obstacle_remeber[0]=0;
+    }
+    break;
+    }
+  }
+}
+//////////////////////////////////////////////
 

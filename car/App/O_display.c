@@ -397,7 +397,7 @@ if(speedaboutangle2>=0)
          Site_t site_m222 = {88,16*2};
          LCD_str(site_m222," ", BLUE,BLACK);
          Site_t site_m12 = {96,16*5};   //x = 10 ,y = 20
-         LCD_num_BC(site_m12,speedaboutangle2,3, BLUE,BLACK);
+         LCD_num_BC(site_m12,speedaboutangle2/10,4, BLUE,BLACK);
 }
 else
 {
@@ -406,7 +406,7 @@ else
          Site_t site_m1111 = {88,16*2};
          LCD_str(site_m1111,"-", BLUE,BLACK);
          Site_t site_m112 = {96,16*5};   //x = 10 ,y = 20
-         LCD_num_BC(site_m112,speedaboutangle2,3, BLUE,BLACK);
+         LCD_num_BC(site_m112,speedaboutangle2/10,4, BLUE,BLACK);
 }
 if(speedaboutangle2>=0)
 {
@@ -443,7 +443,7 @@ else
          Site_t site_m28 = {0,16*3};
          LCD_str(site_m28,"suE", WHITE,color[3]);
          Site_t site_m29 = {32,16*3};   //x = 10 ,y = 20
-         LCD_num_BC(site_m29,wrz_distance,4, WHITE,color[3]);        // wrz_distance     speedwantE_set
+         LCD_num_BC(site_m29,speedwantE_set,4, WHITE,color[3]);        // wrz_distance     speedwantE_set
 
          Site_t site_m30 = {0,16*4};
          LCD_str(site_m30,"Kp", WHITE,color[4]);
@@ -500,16 +500,16 @@ void lcd_show_4()           //主要用于查看其他信息（待完善）
          LCD_num_BC(site_m6,xia_no,3, BLUE,BLACK);
 
          Site_t site_m7 = {64,48};
-         LCD_str(site_m7,"var3", BLUE,BLACK);
+         LCD_str(site_m7,"hyu", BLUE,BLACK);
 
          Site_t site_m8 = {96,48};   //x = 10 ,y = 20
-         LCD_num_BC(site_m8,var3,3, BLUE,BLACK);
+         LCD_num_BC(site_m8, fiag_huan_yu,3, BLUE,BLACK);
 
          Site_t site_m9 = {64,64};
-         LCD_str(site_m9,"var1", BLUE,BLACK);
+         LCD_str(site_m9,"ch", BLUE,BLACK);
 
          Site_t site_m10 = {96,64};   //x = 10 ,y = 20
-         LCD_num_BC(site_m10,var1,3, BLUE,BLACK);
+         LCD_num_BC(site_m10,chao_huan,3, BLUE,BLACK);
 
          Site_t site_m11 = {64,80};
          LCD_str(site_m11,"cu1", BLUE,BLACK);
@@ -518,10 +518,10 @@ void lcd_show_4()           //主要用于查看其他信息（待完善）
          LCD_num_BC(site_m12,cut_1,3, BLUE,BLACK);
 
          Site_t site_m13 = {64,96};
-         LCD_str(site_m13,"var4", BLUE,BLACK);
+         LCD_str(site_m13,"7_", BLUE,BLACK);
 
          Site_t site_m14 = {96,96};   //x = 10 ,y = 20
-         LCD_num_BC(site_m14,var4,3, BLUE,BLACK);
+         LCD_num_BC(site_m14,7,3, BLUE,BLACK);
       //下面显示可以调整的参数
 
          Site_t site_m21 = {0,0};
@@ -529,33 +529,53 @@ void lcd_show_4()           //主要用于查看其他信息（待完善）
 
          Site_t site_m22 = {0,16};
          LCD_str(site_m22,"TU_W", WHITE,color[1]);
-         Site_t site_m23 = {32,16};   //x = 10 ,y = 20
+         Site_t site_m23 = {40,16};   //x = 10 ,y = 20
          LCD_num_BC(site_m23,camera_boundary,3, WHITE,color[1]);
 
          Site_t site_m24 = {0,32};
-         LCD_str(site_m24,"D", WHITE,color[2]);
-         Site_t site_m25 = {32,32};   //x = 10 ,y = 20
-         LCD_num_BC(site_m25,2,3, WHITE,color[2]);
+         LCD_str(site_m24,"hxx1", WHITE,color[2]);
+         Site_t site_m25 = {40,32};   //x = 10 ,y = 20
+if(follow_huan_set[1]==0)       LCD_str(site_m25,"C_R", WHITE,color[2]);              // 1 为寻左线，0为寻右线 2为两车都寻左线，3为两车都寻右线
+else if(follow_huan_set[1]==1)  LCD_str(site_m25,"C_L", WHITE,color[2]);
+else if(follow_huan_set[1]==2)  LCD_str(site_m25,"T_L", WHITE,color[2]);
+else if(follow_huan_set[1]==3)  LCD_str(site_m25,"T_R", WHITE,color[2]);
+else     LCD_num_BC(site_m25,follow_huan_set[1],3, WHITE,color[2]);
 
          Site_t site_m28 = {0,48};
-         LCD_str(site_m28,"zz", WHITE,color[3]);
-         Site_t site_m29 = {32,48};   //x = 10 ,y = 20
-         LCD_num_BC(site_m29,3,3, WHITE,color[3]);
+         LCD_str(site_m28,"hxx2", WHITE,color[3]);
+         Site_t site_m29 = {40,48};   //x = 10 ,y = 20
+if(follow_huan_set[2]==0)       LCD_str(site_m29,"C_R", WHITE,color[3]);              // 1 为寻左线，0为寻右线 2为两车都寻左线，3为两车都寻右线
+else if(follow_huan_set[2]==1)  LCD_str(site_m29,"C_L", WHITE,color[3]);
+else if(follow_huan_set[2]==2)  LCD_str(site_m29,"T_L", WHITE,color[3]);
+else if(follow_huan_set[2]==3)  LCD_str(site_m29,"T_R", WHITE,color[3]);
+else     LCD_num_BC(site_m29,follow_huan_set[2],3, WHITE,color[3]);
 
          Site_t site_m30 = {0,64};
-         LCD_str(site_m30,"4_", WHITE,color[4]);
-         Site_t site_m31 = {32,64};   //x = 10 ,y = 20
-         LCD_num_BC(site_m31,4,3, WHITE,color[4]);
+         LCD_str(site_m30,"hxx3", WHITE,color[4]);
+         Site_t site_m31 = {40,64};   //x = 10 ,y = 20
+if(follow_huan_set[3]==0)       LCD_str(site_m31,"C_R", WHITE,color[4]);              // 1 为寻左线，0为寻右线 2为两车都寻左线，3为两车都寻右线
+else if(follow_huan_set[3]==1)  LCD_str(site_m31,"C_L", WHITE,color[4]);
+else if(follow_huan_set[3]==2)  LCD_str(site_m31,"T_L", WHITE,color[4]);
+else if(follow_huan_set[3]==3)  LCD_str(site_m31,"T_R", WHITE,color[4]);
+else     LCD_num_BC(site_m31,follow_huan_set[3],3, WHITE,color[4]);
 
          Site_t site_m32 = {0,80};
-         LCD_str(site_m32,"5_", WHITE,color[5]);
-         Site_t site_m33 = {32,80};   //x = 10 ,y = 20
-         LCD_num_BC(site_m33,5,3, WHITE,color[5]);
+         LCD_str(site_m32,"hxx4", WHITE,color[5]);
+         Site_t site_m33 = {40,80};   //x = 10 ,y = 20
+if(follow_huan_set[4]==0)       LCD_str(site_m33,"C_R", WHITE,color[5]);              // 1 为寻左线，0为寻右线 2为两车都寻左线，3为两车都寻右线
+else if(follow_huan_set[4]==1)  LCD_str(site_m33,"C_L", WHITE,color[5]);
+else if(follow_huan_set[4]==2)  LCD_str(site_m33,"T_L", WHITE,color[5]);
+else if(follow_huan_set[4]==3)  LCD_str(site_m33,"T_R", WHITE,color[5]);
+else     LCD_num_BC(site_m33,follow_huan_set[4],3, WHITE,color[5]);
 
          Site_t site_m34 = {0,96};
-         LCD_str(site_m34,"6_", WHITE,color[6]);
-         Site_t site_m35 = {32,96};   //x = 10 ,y = 20
-         LCD_num_BC(site_m35,6,3, WHITE,color[6]);
+         LCD_str(site_m34,"hxx5", WHITE,color[6]);
+         Site_t site_m35 = {40,96};   //x = 10 ,y = 20
+if(follow_huan_set[5]==0)       LCD_str(site_m35,"C_R", WHITE,color[6]);              // 1 为寻左线，0为寻右线 2为两车都寻左线，3为两车都寻右线
+else if(follow_huan_set[5]==1)  LCD_str(site_m35,"C_L", WHITE,color[6]);
+else if(follow_huan_set[5]==2)  LCD_str(site_m35,"T_L", WHITE,color[6]);
+else if(follow_huan_set[5]==3)  LCD_str(site_m35,"T_R", WHITE,color[6]);
+else     LCD_num_BC(site_m35,follow_huan_set[5],3, WHITE,color[6]);
 
          Site_t site_m26 = {0,112};
          LCD_FSTR_CH(site_m26,page_down ,WHITE, color[7]) ;     //下一页
@@ -609,16 +629,16 @@ void lcd_show_6()           //主要用于查看其他信息（待完善）
          LCD_num_BC(site_m6,xia_no,3, BLUE,BLACK);
 
          Site_t site_m7 = {64,48};
-         LCD_str(site_m7,"var3", BLUE,BLACK);
+         LCD_str(site_m7,"4_", BLUE,BLACK);
 
          Site_t site_m8 = {93,48};   //x = 10 ,y = 20
-         LCD_num_BC(site_m8,var3,3, BLUE,BLACK);
+         LCD_num_BC(site_m8,4,3, BLUE,BLACK);
 
          Site_t site_m9 = {64,64};
-         LCD_str(site_m9,"var1", BLUE,BLACK);
+         LCD_str(site_m9,"5_", BLUE,BLACK);
 
          Site_t site_m10 = {96,64};   //x = 10 ,y = 20
-         LCD_num_BC(site_m10,var1,3, BLUE,BLACK);
+         LCD_num_BC(site_m10,5,3, BLUE,BLACK);
 
          Site_t site_m11 = {64,80};
          LCD_str(site_m11,"cu1", BLUE,BLACK);

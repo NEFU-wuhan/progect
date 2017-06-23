@@ -12,6 +12,8 @@
 #define SD_DO  PTE1_OUT    //输出
 
 uint8 SD_save_flag=0;
+uint32 picture_sum=0;  //读图像模式下返回图像总数
+uint32 zhizhen=5;     //读图像初始指针位置
 
 uint8   SDHC_Buff[512];
 uint8   SD_OK=0;

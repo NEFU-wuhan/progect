@@ -29,13 +29,11 @@ int measure_distance()                                   //²â¾àº¯Êı£¬Ö±½Óµ÷ÓÃ¼´¿
     pit_close (PIT3);  //¹Ø±Õ¼ÆÊıÆ÷£¨´ËÊ±¼ÆÊıÖµÇåÁã£©
   }
 
-
-  if((int)(timevar*0.34)<5000&&(int)(timevar*0.34)>50)//¾àÀëĞ¡ÓÚ3m,´óÓÚ0.05mÓĞĞ§
+  if(((int)(timevar * 340 /2/1000)/5+3 )<500 && ((int)(timevar * 340 /2/1000)/5+3 )>5)//¾àÀëĞ¡ÓÚ5m,´óÓÚ0.05mÓĞĞ§
   {
     s_distance_lll=s_distance_ll;
     s_distance_ll = s_distance_l;
     s_distance_l = s_distance;
-//    s_distance = (int)(timevar * 0.34);//»ñÈ¡¾àÀë£¬µ¥Î»mm
     s_distance = (int)(timevar * 340 /2/1000)/5+3;
     s_distance = (int)((s_distance + s_distance_l + s_distance_ll + s_distance_lll)/4);//Êı¾İÆ½»¬
   }
@@ -44,37 +42,101 @@ int measure_distance()                                   //²â¾àº¯Êı£¬Ö±½Óµ÷ÓÃ¼´¿
   return s_distance;
 }
 
-//int measure_distance()                                   //²â¾àº¯Êı£¬Ö±½Óµ÷ÓÃ¼´¿É£¬·µ»ØÖµÊÇs_distance£¬Íâ²¿±äÁ¿£¬¿ÉÈ«¾ÖÒıÓÃ
-//{
-//    if(gpio_get(receive_flag)==1)                        //Èç¹ûĞÅºÅ²É¼¯±êÖ¾Î»Îª1£¬ÄÇÃ´¿ªÊ¼²É¼¯¾àÀë
-//    {
-//      flag = 0;
-//      while(gpio_get(ECHG) == 0)                      //µÈ´ıµçÆ½±ä¸ß£¬µÍµçÆ½Ò»Ö±µÈ´ı
-//      {
-//        if(gpio_get(receive_flag)==0) break;
-//      }
-//      pit_time_start  (PIT3);                         //¿ªÊ¼¼ÆÊ±
-//      while(gpio_get(ECHG) == 1)                      //µÈ´ıµçÆ½±äµÍ£¬¸ßµçÆ½Ò»Ö±µÈ´ı
-//      {
-//        flag++;
-//        if(flag >FLAGWAIT||gpio_get(receive_flag)==0)  break;  //´Ë´¦Ó¦¸ÃÊÇµÈ´ıÒç³ö
-//      }
-//
-//      timevar = pit_time_get_us    (PIT3);            //Í£Ö¹¼ÆÊ±£¬»ñÈ¡¼ÆÊ±Ê±¼ä
-//
-//      if(flag <FLAGWAIT )
-//      {
-//        s_distance_lll=s_distance_ll;
-//        s_distance_ll = s_distance_l;
-//        s_distance_l = s_distance;
-//        s_distance = (timevar * 340 /2/1000)/5+3;     //Ê±¼äºÍ¾àÀëÖ®¼äµÄ×ª»»
-//        s_distance = (int)((s_distance + s_distance_l + s_distance_ll + s_distance_lll)/4);//Êı¾İÆ½»¬
-//      }
-//
-//    }
-//    else  s_distance = 550;                            //ĞÅºÅ²É¼¯²»µ½µÄÊ±ºò£¬·µ»Ø550CM
-////   printf("%d\n",s_distance);
-//    return s_distance;
-//
-//}
+//-------------------------------------------------
+//                 ÆÂµÀ²âÁ¿
+//ÊäÈë
+//Êä³ö
+//¹¦ÄÜ ÆÂµÀ²âÁ¿
+//ÈÕÆÚ 2016-06-26
+//×÷Õß
+//--------------------------------------------------
+int16 distan[10];
+int16 distan_acc[10];
+int8  distan0=0;         //Æ½¾ùÖµ
+int16 distan1=0;      //¹«Ê½»»ËãÖµ
+int32 distan2=0;
+
+int8 Ramp_flag=0;            //ÆÂµÀ±êÖ¾  £ºÆÂÉÏ--1  ÆÂºó--2  Æ½Â·--0
+int8 Ramp_flag_pre=0;
+int8 Ramp_en=1;     //ÆÂµÀÊ¹ÄÜ
+int8 Ramp_jiansu_start=0,Ramp_after_jiasu=0;  //ÆÂµÀ¼õËÙ±êÖ¾
+int32 Ramp_Len=0;           //  ÉÏÆÂ²½Êı
+uint8 Ramp_yushibie=0;
+uint8 Ramp_Len_yu=0;
+
+void Ramp_mesure()
+{
+  int8 i=0,j=0;
+  int16 Votage_Gyroscope=0;
+  float aa=2.146e+05;
+  float bb=-1.266;
+
+  Votage_Gyroscope=0;
+  Votage_Gyroscope   = (adc_once(ADC1_DM1, ADC_12bit)+adc_once(ADC1_DM1, ADC_12bit)+adc_once(ADC1_DM1, ADC_12bit))/3;
+  //¹«Ê½»»Ëã³É¾àÀë
+  distan1=aa*pow(Votage_Gyroscope,bb);
+  if(distan1<5)distan1=5;
+  if(distan1>80)distan1=80;
+  distan[0]=distan1;
+  //´æ´¢ADCÖµ
+  for(i=10;i>0;i--)
+  {
+    distan[i]=distan[i-1];
+  }
+  //ÀÛ¼ÓÇóÆ½¾ù
+  for(i=0;i<10;i++)
+  {
+    distan2+=distan[i];
+  }
+  distan0=distan2/10;        //Æ½¾ùÖµ
+
+  //ÀÛ¼ÓÆ½¾ùÖµ
+  for(i=10;i>0;i--)
+  {
+    distan_acc[i]=distan_acc[i-1];
+  }
+  distan_acc[0]=distan0;
+
+ //Ôö¼ÓÂË²¨£¬·ÀÖ¹Í»È»µÄÌø±ä£¬j==6±íÊ¾Ò»Ö±ÔÚÉÏÉı£¬j==-6±íÊ¾Ò»Ö±ÔÚÏÂ½µ
+  for(i=0;i<10;i++)
+  {
+    if(distan_acc[i]<=50) j++;
+    else j--;
+  }
+//  if( (distan0<distan_value) && (Ramp_flag==0) && Ramp_en && gpio_get(receive_flag)==0 && Ramp_yushibie==0 )      //  &&(j==10)
+//  {
+//    Ramp_flag=1;
+//  }
+  if((Ramp_flag!=0)&&(Ramp_flag_pre==0))
+  {    //ÆÂµÀ¿ªÊ¼
+    Ramp_Len=Total_distance;
+  }
+  if(Ramp_flag!=0)
+  {
+    if(Ramp_yushibie==1)  Ramp_Len_yu=155;
+      else Ramp_Len_yu=115;
+    if(((Total_distance-Ramp_Len)>=20)&&((Total_distance-Ramp_Len)<=Ramp_Len_yu) )     // *72.358
+    {    //Ê¶±ğÉÏÆÂ½×¶Î£¬¼õËÙ
+      Ramp_jiansu_start =1;
+    }
+    else if(((Total_distance-Ramp_Len)>Ramp_Len_yu)&&((Total_distance-Ramp_Len)<=(Ramp_Len_yu+50)))     // *72.358
+    {    //Ê¶±ğÏÂÆÂ½×¶Î£¬¼ÓËÙ
+      Ramp_jiansu_start =0;
+      Ramp_after_jiasu =1;
+    }
+    else if(((Total_distance-Ramp_Len)>(Ramp_Len_yu+50)) && ((Total_distance-Ramp_Len)<((Ramp_Len_yu+50)+300)))     // *72.358
+    {    //ÆÂµÀºóÒ»¶¨¾àÀë²»ÔÙÊ¶±ğÆÂµÀ
+      Ramp_flag=2;
+    }
+    else if( (Total_distance-Ramp_Len)>((Ramp_Len_yu+30)+300) )
+    {
+      Ramp_flag=0;
+      Ramp_after_jiasu =0;
+      Ramp_Len=0;
+      Ramp_yushibie=0;
+      Ramp_Len_yu=0;
+    }
+  }
+  Ramp_flag_pre=Ramp_flag;
+}
 

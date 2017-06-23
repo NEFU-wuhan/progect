@@ -43,6 +43,8 @@
 #define Last_Zone_Index  500000
 
 extern uint8 SD_save_flag;
+extern uint32 picture_sum; //读图像模式下返回图像总数
+extern uint32 zhizhen;     //读图像初始指针位置
 
 extern uint8  SD_OK,SaveData;
 extern uint8  SDHC_Buff[512];

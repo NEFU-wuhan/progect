@@ -204,7 +204,7 @@ static int rcvr_datablock (uint8   *buff, uint32  btr)
             }
 
             while (0 == (SDHC_PRSSTAT & SDHC_PRSSTAT_BREN_MASK)) {};
-
+            
             //Ð¡¶Ë
             *ptr++ = SDHC_DATPORT;
         }

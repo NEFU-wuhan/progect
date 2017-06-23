@@ -16,7 +16,6 @@ int8 Motor_En;      //电动机使能 0--disable  1--enable
 
 uint8 Cross_flag=0;
 uint8 Trick_flag=0;
-int8 Ramp_flag=0;            //坡道标志  -1：下坡  0：平路  1：上坡   Ramp_flag_pre
 
 uint8 Servos_En=0;
 
@@ -49,7 +48,7 @@ uint8 Cross_z_jibu=0,Cross_jici_ru=0;
 int16 Init_flag_Len;
 uint8 Cross_flag_pre=0,Cross_jici=0;
 uint16 Cross_Len3,Cross_Len4;
-uint32 Ramp_Len_x=0,Ramp_jici=0;
+//uint32 Ramp_Len_x=0,Ramp_jici=0;
 uint8 suoxian_kaishi=1;
 int16 sensitivity_an=0;  //脉冲扫描灵敏度
 uint8 yuzhi_genggai=0;
@@ -112,7 +111,6 @@ int16 bat_voltage_measure()
 //日期
 //作者
 //--------------------------------------------------
-
 void Time_Commen()
 {
    static int i=0;

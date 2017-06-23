@@ -21,9 +21,9 @@ extern uint8  X_point[70];
 extern uint8  Y_point[70];
 extern float last_mid_line;
 
-extern uint8 fiag_huan_r,fiag_huan_l,fiag_huan;
+extern uint8 fiag_huan_r,fiag_huan_l,fiag_huan,fiag_huan_yu;
 extern uint8 follow_huan;    //1 为寻左线，0为寻右线
-
+extern uint8 follow_huan_set[6];    //1 为寻左线，0为寻右线 2为两车都寻左线，3为两车都寻右线
 extern uint8 hehe,hehe1;
 extern uint8 xia_no;
 extern uint8 road_count_chao;
@@ -31,6 +31,10 @@ extern uint8 road_wide_chao[];
 extern uint8 R_wrz_flag;
 extern uint8 L_wrz_flag;
 
+//障碍
+extern uint8 never_obstacle_flag;
+extern uint8 left_obstancle_flag;
+extern uint8 right_obstancle_flag;
 
 typedef enum
 {
@@ -79,6 +83,8 @@ extern uint8 right_lost_count;
 extern uint8 yiting;
 extern int ccout;
 extern uint8 stop_count;
+extern void avoid_obstacle(uint8 *src);//障碍
+
 
 
 #endif //___GEMINI_PICTURE_DEAL_H

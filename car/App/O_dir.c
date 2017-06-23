@@ -20,6 +20,8 @@ int8 mid_line_last[5]={0};   //保存过去的五组中值     可以为负   不能定义为uint8
 
 uint16 sqrt_16_kp2;      //计算(line_num-used_length)的1.5次方
 
+uint32 obstancle_time_pluse=0;
+uint8 obstancle_acc=0;      //障碍记步
 //******************舵机***********************//
 float mid_line;
 int32 SE_duty;                  //舵机的PWM占空比
@@ -117,18 +119,75 @@ void quan_dir_duty_new()
     uint8 i;                                        //利用赛道宽度检测坡道
     static int32 num,add;
 
-
-    if(origin_chao_cont==1)
+/////////////////////////////////////////////////////////////////////
+         /*障碍处理*/        //一段时间的记步  图像偏移
+    if(left_obstancle_flag==1&&never_obstacle_flag==1&&Ramp_flag==0)
     {
-      if(Motor_En==0) var4=1;
-      set_midline=origin_chao( mid_line );
+
+      if(obstancle_time_pluse<=2200)
+      {
+
+        for(i=0;i<used_length;i++)
+        {
+          line[i].mid_line_new=line[i].right_line-17;
+        }
+        obstancle_time_pluse+=Car_Speed_ave;
+      }
+       else      //记步大于一定的数
+       {
+        obstancle_time_pluse=0;
+        left_obstancle_flag=0;
+        never_obstacle_flag=0;
+        obstancle_acc=0;
+       }
+    }
+    else if(right_obstancle_flag==1&&never_obstacle_flag==1&&Ramp_flag==0)
+    {
+
+
+       if(obstancle_time_pluse<=2200)
+       {
+        for(i=0;i<used_length;i++)
+        {
+          line[i].mid_line_new=line[i].left_line+17;
+        }
+        obstancle_time_pluse+=Car_Speed_ave;
+       }
+       else
+       {
+          obstancle_time_pluse=0;
+          right_obstancle_flag=0;
+          never_obstacle_flag=0;
+          obstancle_acc=0;
+       }
     }
     else
     {
-      if(Motor_En==0) var4=0;
+
+    }
+  ////////////////////////////////////////////////////////////
+
+    if(origin_chao_cont==1)
+    {
+      if(Motor_En==0)
+      {
+        if(front_car==1)   //前车靠左
+          L_wrz_flag=2;
+        else R_wrz_flag=2;
+      }
+      if( L_wrz_flag==2 || R_wrz_flag==2 )
+        set_midline=origin_chao( mid_line );
+    }
+    else
+    {
+      if(Motor_En==0)
+      {
+        L_wrz_flag=0;
+        R_wrz_flag=0;
+      }
     }
     //弯道进直道超车
-    if(wrz_chao_cont==1 )     //&& Total_distance>250
+    if(wrz_chao_cont==1 && ( L_wrz_flag==1 || R_wrz_flag==1 ))     //&& Total_distance>250
     {
       set_midline=wrz_chao( 1 );
     }
@@ -141,9 +200,9 @@ void quan_dir_duty_new()
          }
         if(line[i].line_case_mode != starline)
         {
-          if( (L_wrz_flag==3 || L_wrz_flag==2 || L_wrz_flag==1 ) && xia_no==0  )   //完全出环道之后才开始寻左线或寻右线
+          if( ( (L_wrz_flag==2&&origin_chao_cont==1) || (L_wrz_flag==1&& wrz_chao_cont==1) ) && xia_no==0  )   //完全出环道之后才开始寻左线或寻右线
             num=(line[i].left_line+16)*quan1[i]+num;       //加权每一行的zuo坐标
-          else if( (R_wrz_flag==3 || R_wrz_flag==2 || R_wrz_flag==1) && xia_no==0 )   //&& Ramp_flag==0
+          else if( ( (R_wrz_flag==2&&origin_chao_cont==1) || (R_wrz_flag==1&&wrz_chao_cont==1) ) && xia_no==0 )   //&& Ramp_flag==0
             num=(line[i].right_line-16)*quan1[i]+num;       //加权每一行的you坐标
           else
             num=(line[i].mid_line_new)*quan1[i]+num;       //加权每一行的mid_line_new坐标
@@ -196,29 +255,6 @@ void quan_dir_duty_new()
 //	dealt_error=error_d/(0.035);
  }
 
-float huandao(float piancha)
-{
-  int lin;
-  int flag=0;
-  int num1=0,add1=0;
-  int num_count;
-  float left_Sabc1=0;
-  float right_Sabc1=0;
-  int i;
-  float a;
-
-
-//  if(fiag_huan==0)
-//  {
-//
-//    return Kp1=11.5;
-//  }
-//  else
-//  {
-//      return Kp1=15;
-//  }
-
-}
 /*舵机PD控制函数*/    //可以尝试别的算法 这个算法有它的局限性
 #define nWidth  128
 #define nHeight 70
@@ -227,9 +263,7 @@ void DJ_PID(void)
     //可以加前馈补偿PID
 //    if(ABS(error)<=30)        //小弯大D值，小打角就好        大弯小D值  打角别太猛
 //		Kd=800;
-//  Kp1=huandao(error);
-
-	sqrt_16_kp2=sqrt_16((nHeight-used_length)*(nHeight-used_length)*(nHeight-used_length));
+    sqrt_16_kp2=sqrt_16((nHeight-used_length)*(nHeight-used_length)*(nHeight-used_length));
 //    Kp=Kp1+(nHeight-used_length)*(nHeight-used_length)*Kp2/100;
     Kp=Kp1+sqrt_16_kp2*Kp2/50.0;
 

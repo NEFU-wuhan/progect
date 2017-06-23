@@ -27,7 +27,10 @@ extern int MIN_dir_duty;
 extern float index_A,index_B;    //index_A为斜率  index_B为截距   斜率一般更为常用
 
 extern void DJ_PID(void);
-
+//障碍记次数
+extern uint8 left_obstancle_acc;
+extern uint8 right_obstancle_acc;
+extern uint8 obstancle_acc;
 
 
 
