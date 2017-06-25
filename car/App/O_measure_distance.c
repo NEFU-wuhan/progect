@@ -124,11 +124,11 @@ void Ramp_mesure()
       Ramp_jiansu_start =0;
       Ramp_after_jiasu =1;
     }
-    else if(((Total_distance-Ramp_Len)>(Ramp_Len_yu+50)) && ((Total_distance-Ramp_Len)<((Ramp_Len_yu+50)+300)))     // *72.358
+    else if(((Total_distance-Ramp_Len)>(Ramp_Len_yu+50)) && ((Total_distance-Ramp_Len)<((Ramp_Len_yu+50)+100)))     // *72.358
     {    //坡道后一定距离不再识别坡道
       Ramp_flag=2;
     }
-    else if( (Total_distance-Ramp_Len)>((Ramp_Len_yu+30)+300) )
+    else if( (Total_distance-Ramp_Len)>((Ramp_Len_yu+30)+100) )
     {
       Ramp_flag=0;
       Ramp_after_jiasu =0;

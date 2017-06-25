@@ -29,7 +29,7 @@ uint8 wrz_chao_cont=     0 ;
 //环道超车控制标志
 uint8 huan_chao_cont=    0 ;
 //SD卡操作模式
-uint8 SD_op_mode=        0 ;     //  0-保存图像  1-连续读图像  2-单步读图像(单步暂时未写，可以直接单步调试)
+uint8 SD_op_mode=        2 ;  //  0-保存图像  1-连续读图像但重新进行处理  2-连续读图像但不处理只看实际运行时的标志
 //超车次数设置
 uint8 chao_car_cnt_set=  5 ;
 //=======================================
@@ -120,16 +120,84 @@ void send_nrf()
   updata_var(VAR6);
   var_syn(VAR_MAX);       //同步全部 ,必须先同步再显示全部，因为有可能同步失败。
 }
+
+int cece=0;
+//将所有运行数据保存在数组中
+void save_all_date()
+{
+  uint8 i=0;
+  for(i=0;i<line_num;i++) date_read_buff[i]=line[i].left_line_unrepiar;
+  for(i=0;i<line_num;i++) date_read_buff[i+line_num]=line[i].right_line_unrepiar;
+  for(i=0;i<line_num;i++) date_read_buff[i+line_num*2]=line[i].mid_line_new;
+  for(i=0;i<line_num;i++) date_read_buff[i+line_num*3]=line[i].left_line;
+  for(i=0;i<line_num;i++) date_read_buff[i+line_num*4]=line[i].right_line;
+  for(i=0;i<line_num;i++) date_read_buff[i+line_num*5]=line[i].mid_line;
+  for(i=0;i<line_num;i++) date_read_buff[i+line_num*6]=line[i].left_line_state;
+  for(i=0;i<line_num;i++) date_read_buff[i+line_num*7]=line[i].right_line_state;
+  for(i=0;i<line_num;i++) date_read_buff[i+line_num*8]=line[i].line_case_mode;
+  for(i=0;i<line_num;i++) date_read_buff[i+line_num*9]=line[i].road_wide;
+  date_read_buff[line_num*10]  =fiag_huan;
+  date_read_buff[line_num*10+1]=xia_no;
+  date_read_buff[line_num*10+2]=hehe;
+  date_read_buff[line_num*10+3]=follow_huan;
+  date_read_buff[line_num*10+4]=Ramp_flag;
+  date_read_buff[line_num*10+5]=cut_2;
+  date_read_buff[line_num*10+6]=Ramp_Len/20;
+  date_read_buff[line_num*10+7]=Total_distance/20;
+  date_read_buff[line_num*10+8]=Ramp_Len_yu;
+  date_read_buff[line_num*10+9]=Ramp_yushibie;
+  if(s_distance>255)
+    date_read_buff[line_num*10+10]=255;
+  else
+    date_read_buff[line_num*10+10]=s_distance;
+  date_read_buff[line_num*10+11]=front_car;
+  date_read_buff[line_num*10+12]=speedwant;
+  date_read_buff[line_num*10+13]=speedwantD;
+  date_read_buff[line_num*10+14]=speedwantE;
+
+
+}
+//将数组中的所有数据提取到对应变量中
+void read_all_date()
+{
+  uint8 i=0;
+  for(i=0;i<line_num;i++) line[i].left_line_unrepiar =  date_read_buff[i];
+  for(i=0;i<line_num;i++) line[i].right_line_unrepiar=  date_read_buff[i+line_num];
+  for(i=0;i<line_num;i++) line[i].mid_line_new       =  date_read_buff[i+line_num*2];
+  for(i=0;i<line_num;i++) line[i].left_line          =  date_read_buff[i+line_num*3];
+  for(i=0;i<line_num;i++) line[i].right_line         =  date_read_buff[i+line_num*4];
+  for(i=0;i<line_num;i++) line[i].mid_line           =  date_read_buff[i+line_num*5];
+  for(i=0;i<line_num;i++) line[i].left_line_state    =  date_read_buff[i+line_num*6];
+  for(i=0;i<line_num;i++) line[i].right_line_state   =  date_read_buff[i+line_num*7];
+  for(i=0;i<line_num;i++) line[i].line_case_mode     =  date_read_buff[i+line_num*8];
+  for(i=0;i<line_num;i++) line[i].road_wide          =  date_read_buff[i+line_num*9];
+  fiag_huan             =date_read_buff[line_num*10];
+  xia_no                =date_read_buff[line_num*10+1];
+  hehe                  =date_read_buff[line_num*10+2];
+  follow_huan           =date_read_buff[line_num*10+3];
+  Ramp_flag             =date_read_buff[line_num*10+4];
+  cut_2                 =date_read_buff[line_num*10+5];
+  Ramp_Len              =date_read_buff[line_num*10+6]*20;
+  Total_distance        =date_read_buff[line_num*10+7]*20;
+  Ramp_Len_yu           =date_read_buff[line_num*10+8];
+  Ramp_yushibie         =date_read_buff[line_num*10+9];
+  s_distance            =date_read_buff[line_num*10+10];
+  front_car             =date_read_buff[line_num*10+11];
+  speedwant             =date_read_buff[line_num*10+12];
+  speedwantD            =date_read_buff[line_num*10+13];
+  speedwantE            =date_read_buff[line_num*10+14];
+}
 //SD卡保存和处理
 void SD_save_deal()
 {
-  if(( SD_save_flag==0 || SD_save_flag==1) && Motor_En==1 )       //
-  {
-    img_sd_save(imgbuff,CAMERA_SIZE);
-  }
   if( yiting==1 &&  abs(leftval)<10 && abs(rightval)<10 )    //
   {
     SD_save_flag=1;
+  }
+  if(( SD_save_flag==0 || SD_save_flag==1) && Motor_En==1 )       //
+  {
+    img_sd_save(imgbuff,CAMERA_SIZE);
+    img_sd_save(date_read_buff,sizeof(date_read_buff));
   }
 }
 //超声波接收不到数据时计数清零
@@ -177,26 +245,37 @@ void  main(void)
         /************************ 图像采集和显示  ***********************/
         if(SD_op_mode==0) camera_get_img();                           //摄像头采集获取图像
         else img_sd_read( buff, CAMERA_SIZE , zhizhen );              //SD卡获取图像
-        if( zhizhen<((picture_sum-1)*CAMERA_SIZE+4) && flag_key_select==1 && flag_key_l_u_1==1 && boma[5]==1) zhizhen+=CAMERA_SIZE;
+        if( zhizhen<((picture_sum-1)*CAMERA_SIZE+4) && SD_op_mode!=0
+           && flag_key_select==1 && flag_key_l_u_1==1 && boma[5]==1)
+        {
+          if(SD_op_mode==1) zhizhen+=2*CAMERA_SIZE;
+          else if(SD_op_mode==2) zhizhen+=CAMERA_SIZE;
+        }
 //            printf("666");
 
         /************************ 图像解压        ***********************/
         if(SD_op_mode==0) img_extract1(img,imgbuff);          //摄像头图像解压
         else img_extract1(img,buff);                          //SD卡  图像解压
 
-        /************************ 图像处理        ***********************/
+        /************************ 图像处理         ***********************/
         median_line_extract(img);
 
+        /************************  数据读取        ***********************/
+        if(SD_op_mode==2) img_sd_read( date_read_buff, sizeof(date_read_buff) , zhizhen );              //SD卡获取的实际运行数据
+        if( zhizhen<((picture_sum-1)*CAMERA_SIZE+4) && SD_op_mode==2
+           && flag_key_select==1 && flag_key_l_u_1==1 && boma[5]==1) zhizhen+=CAMERA_SIZE;
+
         /*******************      起跑线      ***************************/
-        if(Ramp_flag==0) start_line(img);
+        if(SD_op_mode!=2 && Ramp_flag==0) start_line(img);
 
         /*******************      障碍      ***************************/
-        if(never_obstacle_flag==0&&Ramp_flag==0&&fiag_huan==0&&obstancle_acc==0&&shi_zi_count==0)
+        if(SD_op_mode!=2 && never_obstacle_flag==0
+           && Ramp_flag==0&&fiag_huan==0&&obstancle_acc==0&&shi_zi_count==0)
         {
 //          avoid_obstacle(img);                    //躲避障碍
         }
 
-        quan_dir_duty_new();				    //算出每一帧图像的中线权重
+        if(SD_op_mode!=2) quan_dir_duty_new();				    //算出每一帧图像的中线权重
 
 //        hswy_sendimg(img);         //红书伟业上位机图像传输
 
@@ -210,25 +289,29 @@ void  main(void)
           }while(nrf_result != NRF_RESULT_RX_NO);         //接收不到数据 才退出
 
           //--------处理接收数据-----------
-        recive_nrf();
+        if(SD_op_mode!=2) recive_nrf();
 //        vcan_sendware(var_wire, sizeof(var_wire));
         }
         else
         //--------开始发送数据-----------
-         send_nrf();
+        if(SD_op_mode!=2) send_nrf();
 #endif
 
+        if(SD_op_mode!=2) Ramp_mesure();    //坡道识别
+
+        if(SD_op_mode!=2) ceju_zhi0();      //测距清零
+
+        if(SD_op_mode==0) save_all_date();
+        else if(SD_op_mode==2) read_all_date();
+
+        if(SD_op_mode==0 && boma[5]==1)  SD_save_deal();
 
         /*********************** 按键消息 处理  ***********************/
         deal_key_event();
 
         LCD_show();
 
-        if(SD_op_mode==0 && boma[5]==1)  SD_save_deal();
 
-        Ramp_mesure();    //坡道识别
-
-        ceju_zhi0();      //测距清零
 
     }
 }

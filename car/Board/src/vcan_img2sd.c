@@ -52,7 +52,7 @@ void img_sd_init( uint8 mode )
     }
     else
     {
-      vcanres = f_open(&vcansrc, "0:/FIRE1.SD", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);  //打开文件，如果没有就创建，带读写打开
+      vcanres = f_open(&vcansrc, "0:/FIRE.SD", FA_OPEN_ALWAYS | FA_WRITE | FA_READ);  //打开文件，如果没有就创建，带读写打开
       if ( vcanres == FR_OK )
       {
         size = f_size(&vcansrc);                   //获取文件的总大小
@@ -96,9 +96,39 @@ void img_sd_save(uint8 * imgaddr,uint32 size)
     }
 }
 
+void img_sd_save1(int * imgaddr,uint32 size)
+{
+    int   vcanres;
+    uint32 mybw;
+    static uint8 time = 0;
+    //uint32 size = CAMERA_SIZE;
+
+    if(vcansrc.fs != 0)
+    {
+        vcanres = f_write(&vcansrc, imgaddr, size ,&mybw);
+
+        if(vcanres != FR_OK)
+        {
+            f_close(&vcansrc);
+            vcansrc.fs = 0;
+        }
+        if(SD_save_flag==1)
+        {
+          f_sync(&vcansrc);
+          SD_save_flag=2;
+          img_sd_exit();
+        }
+    }
+}
 //读取sd卡中的图像，dst-图像保存地址 size-图像占用空间大小  read_imgaddr-读取指针位置
 //例：  img_sd_read( buff, CAMERA_SIZE , zhizhen )
 void img_sd_read(uint8 * dst, uint32 size, uint32 read_imgaddr)
+{
+    uint32 sizetmp;
+    f_lseek(&vcansrc, read_imgaddr);
+    f_read (&vcansrc, dst, size, &sizetmp);   //读取
+}
+void img_sd_read1(int * dst, uint32 size, uint32 read_imgaddr)
 {
     uint32 sizetmp;
     f_lseek(&vcansrc, read_imgaddr);

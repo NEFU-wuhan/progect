@@ -7,6 +7,8 @@ extern uint8  nrf_tx_buff[];         //‘§∂‡
 extern uint8  nrf_rx_buff[];         //‘§∂‡
 extern uint8 *imgbuff;
 extern uint8 buff[CAMERA_SIZE];
+extern uint8 date_save_buff[CAMERA_SIZE];  // CAMERA_SIZE =160*120/8=2400
+extern uint8 date_read_buff[CAMERA_SIZE];
 
 /*-----------------  flash  ------------------------*/
 #define     ADDR                    FLASH_SECTOR_NUM - 1    //µÿ÷∑

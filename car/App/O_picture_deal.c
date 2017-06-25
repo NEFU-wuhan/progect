@@ -259,7 +259,7 @@ void record_side_wide_part()
 
 //------------------------------------------------------------------------------
 //功能    记录停车瞬间最下面几行的赛道宽度并与后面的赛道宽度比较是否变窄（用于直道超车）
-//输出 road_count_chao 变窄的行数
+//输出 road_count_chao 变窄的行数   wider 变窄的宽度
 //------------------------------------------------------------------------------
 void recoed_xia_wide( uint8 i ,uint8 wider)
 {
@@ -280,21 +280,91 @@ void recoed_xia_wide( uint8 i ,uint8 wider)
 }
 
 //------------------------------------------------------------------------------
+//功能    寻找十字 左上 尖角
+//------------------------------------------------------------------------------
+uint8 cross_LeftUp_found( uint8 i )
+{
+  //竖线肯定差距不大，横线分为从0直接跳到拐点和从0逐渐到拐点两种情况
+  if( i>6 && abs(line[i].left_line_unrepiar-line[i-3].left_line_unrepiar)<=4
+     && line[i].left_line_unrepiar>5 && line[i-3].left_line_unrepiar>5
+       && abs(line[i-4].left_line_unrepiar-line[i-6].left_line_unrepiar)>4
+       )
+  {
+      return (i-1);
+  }
+  return 0;
+}
+//------------------------------------------------------------------------------
+//功能    寻找十字 右上 尖角
+//------------------------------------------------------------------------------
+uint8 cross_RightUp_found( uint8 i )
+{
+  //竖线肯定差距不大，横线分为从0直接跳到拐点和从0逐渐到拐点两种情况
+  if( i>6 && abs(line[i].right_line_unrepiar-line[i-3].right_line_unrepiar)<=4
+     && line[i].right_line_unrepiar<123 && line[i-3].right_line_unrepiar<123
+       && abs(line[i-4].right_line_unrepiar-line[i-6].right_line_unrepiar)>4
+       )
+  {
+      return (i-1);
+  }
+  return 0;
+}
+//------------------------------------------------------------------------------
+//功能    寻找十字 左下 尖角
+//------------------------------------------------------------------------------
+uint8 cross_LeftDown_found( uint8 i )
+{
+    if( i>3 && line[i-1].left_line>5
+       &&  line[i-2].left_line-line[i-3].left_line>0 && (line[i-1].left_line-line[i-2].left_line==0)
+       || (line[i-2].left_line-line[i-3].left_line>0)&&  line[i  ].left_line-line[i-1].left_line<0
+            && (line[i].road_wide-line[i-1].road_wide>0 || line[i].road_wide-distance2[i]>12)
+       || (line[i-1].left_line-line[i-2].left_line>0)&&  line[i  ].left_line-line[i-1].left_line<0
+            && (line[i].road_wide-line[i-1].road_wide>=0|| line[i].road_wide-distance2[i]>12))      //line[i].line_case_mode==left_normal_right_lose
+     {
+        return (i-1);
+     }
+    return 0;
+}
+//------------------------------------------------------------------------------
+//功能    寻找十字 右下 尖角
+//------------------------------------------------------------------------------
+uint8 cross_RightDown_found( uint8 i )
+{
+  if( i>3 && line[i-1].right_line<122
+   &&line[i-2].right_line-line[i-3].right_line<0&&(line[i-1].right_line-line[i-2].right_line==0)
+   ||(line[i-2].right_line-line[i-3].right_line<0)&&line[i].right_line-line[i-1].right_line>0
+        &&(line[i].road_wide-line[i-1].road_wide>0||line[i].road_wide-distance2[i]>12)
+   ||(line[i-1].right_line-line[i-2].right_line<0)&&line[i].right_line-line[i-1].right_line>0
+        &&(line[i].road_wide-line[i-1].road_wide>=0||line[i].road_wide-distance2[i]>12))//||line[i].line_case_mode==all_lose
+  {
+     return (i-1);
+  }
+  return 0;
+}
+//------------------------------------------------------------------------------
 //功能    十字底下全丢情况的补线
 //------------------------------------------------------------------------------
 void cross_adding_line( uint8 i )
 {
-//  if(last_lost_count>25)    //上一幅图片丢很多线
-//  {
-//    //--1--
+  static uint8 left_up=0,left_down=0,right_up=0,right_down=0;
+  if(last_lost_count>25)    //上一幅图片丢很多线
+  {
+      //--1-- 先尝试找到十字四个尖角
+      left_up   =cross_LeftUp_found( i );
+      right_up  =cross_RightUp_found( i );
+      left_down =cross_LeftDown_found( i );
+      right_down=cross_RightDown_found( i );
+      //--2-- 最下面左丢线右正常的时候找右下边的尖角
 //    if(line[0].line_case_mode==left_lose_right_normal&&line[i].line_case_mode==all_lose)		  //十字从第一行开始丢
 //    {
 //      line[i].right_line=line[0].right_line-1;
 //    }
+      //--3-- 最下面右丢线左正常的时候找左下边的尖角
 //    if(line[0].line_case_mode==left_normal_right_lose&&line[i].line_case_mode==all_lose)		  //十字从第一行开始丢
 //    {
 //      line[i].left_line=line[0].left_line+1;
 //    }
+      //--4-- 开始根据找到的尖角补线
 //    if(line[0].line_case_mode==all_lose&&line[i].road_wide-distance[i]>20)                            //十字从第一行就全丢
 //    {
 //      line[i].left_line=64-distance[i]/2;
@@ -319,8 +389,28 @@ void cross_adding_line( uint8 i )
 //    shi_zi_flag=0;
 //    never_shi_zi_count=0;
 //  }
+  }
 }
+//------------------------------------------------------------------------------
+//功能    利用这一行的平均值作为开始找线的起点
+//------------------------------------------------------------------------------
+uint8 found_first_line(uint8 *src)
+{
+  int16 last_mid_replace=0,j=0,tmpsrc=0;
+  int16 first_line_num=0,first_line_sum=0;
+  for(j=0;j<128;j++)
+  {
+    tmpsrc=*(src+j);
+    if(tmpsrc==255)
+    {
+      first_line_num++;
+      first_line_sum+=j;
+    }
+  }
+  last_mid_replace=first_line_sum/first_line_num;
 
+  return last_mid_replace;
+}
 
 /*******************************************************************************
 * Function Name: median_line_extract();
@@ -388,21 +478,8 @@ void median_line_extract(uint8 *src)
    /**********************************************/
 
 	/*利用第一行的平均值作为开始找线的起点*/
-    static int16 first_line_num,first_line_sum;
     pimg=src+(69*128);
-    for(j=0;j<128;j++)
-    {
-      tmpsrc=*(pimg+j);
-      if(tmpsrc==255)
-      {
-        first_line_num++;
-        first_line_sum+=j;
-      }
-    }
-    last_mid_first=first_line_sum/first_line_num;
-    first_line_num=0;
-    first_line_sum=0;
-    last_mid=last_mid_first;
+    last_mid=found_first_line( pimg );
     if(last_mid==0)               //如果第一行全为黑就将中值设为64
       last_mid=64;
 
@@ -414,22 +491,22 @@ void median_line_extract(uint8 *src)
         pimg=src+(line_num-1-i)*128;    //倒着处理，从最底下一直扫到最上面
 
         Search_all_boundary( pimg,i );  //单纯的提取左右边线（不进行处理）
-        recoed_xia_wide( i ,15);        //记录最下面几行的赛道宽度用于直道超车
+        recoed_xia_wide( i ,20);        //记录最下面几行的赛道宽度用于直道超车
 // 识别环道
-        if( fiag_huan==0 )  //&& front_car==1
+        if( fiag_huan==0 && SD_op_mode!=2 && SD_op_mode!=2 )  //&& front_car==1
         {
            huan_judge( src , i );
         }
 //环岛识别结束
 //直道和坡道状态识别
-        if( i>54 && fiag_huan==0 && Ramp_flag==0 && Total_distance>100)  //&& Total_distance>250
+        if( i>54 && fiag_huan==0 && Ramp_flag==0 && Total_distance>100 && SD_op_mode!=2)  //&& Total_distance>250
         {                      //&& front_car==1
 //          if(i==55)
 //          {
 //            R_wan_ru_zhi_judge();
 //            L_wan_ru_zhi_judge();
 //          }
-          if( i>54 ) podao_judge( i );  //判断坡道
+          if( i>54 && front_car==1 ) podao_judge( i );  //判断坡道
 //          if( i==69 && Ramp_flag==0 ) zhidao( i );     //识别直道
         }
 
@@ -440,6 +517,7 @@ void median_line_extract(uint8 *src)
 
 		if(last_lost_count>25)
 		 {
+                   cross_LeftUp_found( i );
 			if(line[0].line_case_mode==left_lose_right_normal&&line[i].line_case_mode==all_lose)		  //十字从第一行开始丢
 			 {
 				line[i].right_line=line[0].right_line-1;
@@ -465,8 +543,8 @@ void median_line_extract(uint8 *src)
 		    shi_zi_baochi=0;    //入十字将保持标志位清零
 		if(shi_zi_flag==1&&line[0].line_case_mode==all_lose&&line[i].line_case_mode==all_lose)
 		 {
-			line[i].left_line=64-distance[i]/2;
-			line[i].right_line=64+distance[i]/2;
+			line[i].left_line=last_mid_line-distance[i]/2;
+			line[i].right_line=last_mid_line+distance[i]/2;
 		 }
 		if(last_lost_count<5||line[0].line_case_mode==all_normal)
 		 {
@@ -585,7 +663,7 @@ void median_line_extract(uint8 *src)
 
 
         ////请环道标志
-        huan_clear( i );
+        if( SD_op_mode!=2 )huan_clear( i );
 
         //////////////////////////////  环岛巡线  ////////////////////////////
         huan_along( i );
@@ -818,7 +896,7 @@ void huan_mark_start()
   //car_stop(1);
   if(  fiag_huan_yu==0  //加这个条件是为了让前车识别超车标志，开始超车（且不让后车再进入）
      && chao_huan==0    //为了前车只发送一次切换标志，防止停车的时候一直符合条件一直切换，超车完成之后清除标志
-       )   //&& sequence==1
+       )    //&& sequence==1
   {
     if( huan_chao_cont==1 && (chao_cnt_total<=chao_car_cnt_set) )
     {
@@ -980,7 +1058,7 @@ void huan_judge( uint8 *src ,uint8 i )
                   break;
                 }
                 /////////////环道前只能看到一个右尖角的情况
-                if( j>10 && huan_kuan1_r==0 && huan_kuan1_l==0 && line[j].right_line_unrepiar<125
+                if( j>12 && huan_kuan1_r==0 && huan_kuan1_l==0 && line[j].right_line_unrepiar<125
                    &&  line[j].right_line_unrepiar>line[j-2].right_line_unrepiar  && line[j].line_case_mode==left_lose_right_normal
                      &&  line[j-2].right_line_unrepiar>line[j-4].right_line_unrepiar && line[j-4].line_case_mode==left_lose_right_normal
                        &&  line[j-4].right_line_unrepiar>line[j-6].right_line_unrepiar && line[j-6].line_case_mode==left_lose_right_normal
@@ -990,7 +1068,7 @@ void huan_judge( uint8 *src ,uint8 i )
                   huan_loca=j-6;
                 }
                 /////////////环道前只能看到一个左尖角的情况
-                if( j>10 && huan_kuan1_l==0 && huan_kuan1_r==0 && line[j].left_line_unrepiar<125
+                if( j>12 && huan_kuan1_l==0 && huan_kuan1_r==0 && line[j].left_line_unrepiar<125
                    &&  line[j].left_line_unrepiar<line[j-2].left_line_unrepiar  && line[j].line_case_mode==left_normal_right_lose
                      &&  line[j-2].left_line_unrepiar<line[j-4].left_line_unrepiar && line[j-4].line_case_mode==left_normal_right_lose
                        &&  line[j-4].left_line_unrepiar<line[j-6].left_line_unrepiar && line[j-6].line_case_mode==left_normal_right_lose
@@ -1024,10 +1102,16 @@ void huan_judge( uint8 *src ,uint8 i )
                   }
                   Regression_cal(X_buff,Y_buff,huan_loca-4);
                   //找右
-                  pian_src=(int16)(line[huan_loca-4].right_line_unrepiar-5 + (float)(j- huan_loca)/(index_B));
-                  if(pian_src<0)
+                  if(index_B==0) pian_src=line[huan_loca-4].right_line_unrepiar-5;
+                  else pian_src=(int16)(line[huan_loca-4].right_line_unrepiar-5 + (float)(j- huan_loca)/(index_B));
+                  if(pian_src<0 )
                   {
                     pian_src=0;
+                    j=65;
+                  }
+                  else if( pian_src>128)
+                  {
+                    pian_src=128;
                     j=65;
                   }
                   tmpsrc=*(pimg1+pian_src);  //这个点是右边直接加上去的点
@@ -1037,10 +1121,16 @@ void huan_judge( uint8 *src ,uint8 i )
                     you2_x=pian_src ;
                   }
                   //找中
-                  pian_src=(int16)(line[huan_loca-4].mid_line_new + (float)(j- huan_loca)/(index_B)) ;
-                  if(pian_src<0)
+                  if(index_B==0) pian_src=line[huan_loca-4].mid_line_new;
+                  else pian_src=(int16)(line[huan_loca-4].mid_line_new + (float)(j- huan_loca)/(index_B)) ;
+                  if(pian_src<0 )
                   {
                     pian_src=0;
+                    j=65;
+                  }
+                  else if( pian_src>128)
+                  {
+                    pian_src=128;
                     j=65;
                   }
                   tmpsrc=*(pimg1+pian_src);  //这个点是右边直接加上去的点
@@ -1090,17 +1180,36 @@ void huan_judge( uint8 *src ,uint8 i )
                     }
                     Regression_cal(X_buff,Y_buff,huan_loca-4);
                     //zhao左
-                    pian_src=(int16)(line[huan_loca-4].left_line_unrepiar+5 + (float)(j- huan_loca)/(index_B));
-                    if(pian_src<0) pian_src=0;
-                    tmpsrc=*(pimg1+pian_src);  //这个点是右边直接加上去的点
+                    if(index_B==0) pian_src= line[huan_loca-4].left_line_unrepiar+5;
+                    else pian_src=(int16)(line[huan_loca-4].left_line_unrepiar+5 + (float)(j- huan_loca)/(index_B));
+                    if(pian_src<0 )
+                    {
+                      pian_src=0;
+                      j=65;
+                    }
+                    else if( pian_src>128)
+                    {
+                      pian_src=128;
+                      j=65;
+                    }                    tmpsrc=*(pimg1+pian_src);  //这个点是右边直接加上去的点
                     if( tmpsrc ==0 )  // src+(line_num-1-i)*128;
                     {
                       zuo2=1;
                       zuo2_x=pian_src ;
                     }
                     //找中
-                    pian_src=(int16)(line[huan_loca-4].mid_line_new + (float)(j- huan_loca)/(index_B));
-                    if(pian_src<0) pian_src=0;
+                    if(index_B==0) pian_src=line[huan_loca-4].mid_line_new;
+                    else pian_src=(int16)(line[huan_loca-4].mid_line_new + (float)(j- huan_loca)/(index_B));
+                    if(pian_src<0 )
+                    {
+                      pian_src=0;
+                      j=65;
+                    }
+                    else if( pian_src>128)
+                    {
+                      pian_src=128;
+                      j=65;
+                    }
                     tmpsrc=*(pimg1+pian_src);  //这个点是右边直接加上去的点
                     if( tmpsrc ==0  )  // src+(line_num-1-i)*128;    && (line[huan_loca].left_line_unrepiar - (j- huan_loca))>10
                     {
@@ -1158,8 +1267,18 @@ void huan_judge( uint8 *src ,uint8 i )
                 }
                 Regression_cal(X_buff,Y_buff,huan_l_x-4);
                 //zhao左
-                pian_src=(int16)(line[huan_l_x-4].left_line_unrepiar+5 + (float)(j- huan_l_x)/(index_B));
-                if(pian_src<0) pian_src=0;
+                if(index_B==0) pian_src=line[huan_l_x-4].left_line_unrepiar+5;
+                else pian_src=(int16)(line[huan_l_x-4].left_line_unrepiar+5 + (float)(j- huan_l_x)/(index_B));
+                if(pian_src<0 )
+                {
+                  pian_src=0;
+                  j=65;
+                }
+                else if( pian_src>128)
+                {
+                  pian_src=128;
+                  j=65;
+                }
                 tmpsrc=*(pimg1+pian_src);  //这个点是右边直接加上去的点
                 if( tmpsrc ==0 && j>(huan_l_x+5))  // src+(line_num-1-i)*128;
                 {
@@ -1174,8 +1293,18 @@ void huan_judge( uint8 *src ,uint8 i )
                 }
                 Regression_cal(X_buff,Y_buff,huan_r_x-4);
                 //找右
-                pian_src=(int16)(line[huan_r_x-4].right_line_unrepiar-5 + (float)(j- huan_r_x)/(index_B));
-                if(pian_src<0) pian_src=0;
+                if(index_B==0) pian_src=line[huan_r_x-4].right_line_unrepiar-5;
+                else pian_src=(int16)(line[huan_r_x-4].right_line_unrepiar-5 + (float)(j- huan_r_x)/(index_B));
+                if(pian_src<0 )
+                {
+                  pian_src=0;
+                  j=65;
+                }
+                else if( pian_src>128)
+                {
+                  pian_src=128;
+                  j=65;
+                }
                 tmpsrc=*(pimg1+pian_src);  //这个点是右边直接加上去的点
                 if( tmpsrc ==0 && j>(huan_r_x+5) )  // src+(line_num-1-i)*128;    && (line[huan_loca].left_line_unrepiar - (j- huan_loca))>10
                 {
@@ -1272,6 +1401,7 @@ void huan_clear( uint8 i )
            h_jiao_cnt=1;   //每次都只识别一次尖角
            if(chao_huan==1 && huan_chao_cont==1
               && follow_huan_set[hehe]!=2 && follow_huan_set[hehe]!=3
+                && (chao_cnt_total<=chao_car_cnt_set)
                 )      //&& sequence==1
            {
              speedwantD=0;
@@ -1333,6 +1463,7 @@ void huan_clear( uint8 i )
            h_jiao_cnt=1;   //每次都只识别一次尖角
            if(chao_huan==1 && huan_chao_cont==1
               && follow_huan_set[hehe]!=2 && follow_huan_set[hehe]!=3
+                && (chao_cnt_total<=chao_car_cnt_set)
                 )      //&& sequence==1
            {
              speedwantD=0;
@@ -1901,35 +2032,40 @@ void start_line(uint8 *src)
 void start_line_stop()
 {
   static uint8 a=0;
-  if(speedwant >= 120 && a==0)            //速度比较大，延时20ms
-  {
-    a++;
-    flag_key_select=0;
-    flag_key_l_u_5=0;
-
-    car_stop( 1 );
-    yiting = 1;
-  }
-  else                             //速度比较小，延时50ms
+//  if(speedwant >= 120 && a==0)            //速度比较大，延时20ms
+//  {
+//    a++;
+//    flag_key_select=0;
+//    flag_key_l_u_5=0;
+//
+//    car_stop( 1 );
+//    yiting = 1;
+//  }
+//  else                             //速度比较小，延时50ms
   {
     if( s_distance<550 && s_distance>10 )
     {
-      if(stop_count > 15 && a==0)
+      if(stop_count > 25 && a==0)
       {
         a++;
         flag_key_select=0;
         flag_key_l_u_5=0;
+        key_flag_clear=1;
+        shua_one=0;
 
         car_stop( 1 );
         yiting = 1;
       }
     }
     else
-      if(stop_count > 40 && a==0)
+      if(stop_count > 50 && a==0)
       {
         a++;
         flag_key_select=0;
         flag_key_l_u_5=0;
+        key_flag_clear=1;
+        shua_one=0;
+
         car_stop( 1 );
         yiting = 1;
       }
@@ -2091,7 +2227,7 @@ uint8 origin_chao( uint8 cut )
   }
   if(front_car==1)   //停下的车检测到超声波之后恢复正常
   {
-    if( s_distance<550 && s_distance>10 && chao_zhi==1 )    //前车停车等待超车完成时若超声波能检测到数据，证明超车完成
+    if( (s_distance<550 && s_distance>10 || road_count_chao>14) && chao_zhi==1 )    //前车停车等待超车完成时若超声波能检测到数据，证明超车完成
     {
       z=0;
       chao_zhi=0;

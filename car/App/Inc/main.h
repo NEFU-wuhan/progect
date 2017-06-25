@@ -7,6 +7,7 @@ extern uint8 img[160*120];
 
 extern uint8 CAR_MODEL;    //1-号车， 2-2号车， 3-3号车
 
+extern uint8 SD_op_mode;
 ///////////******通信专用变量*******//////
 extern char info;
 

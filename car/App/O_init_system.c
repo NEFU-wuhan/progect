@@ -5,6 +5,8 @@ uint8  nrf_rx_buff[CAMERA_SIZE + 2*COM_LEN + DATA_PACKET];         //预多
 uint8  nrf_tx_buff[CAMERA_SIZE + 2*COM_LEN + DATA_PACKET];         //预多
 uint8 *imgbuff = (uint8 *)(((uint8 *)&nrf_tx_buff) + COM_LEN);     //图像地址  //定义存储接收图像的数组,2400=160*120/8
 uint8 buff[CAMERA_SIZE];
+uint8 date_save_buff[CAMERA_SIZE]={0};
+uint8 date_read_buff[CAMERA_SIZE]={0};
 Ind_msg Ind ={0};
 
 void NRF_INIT(void);
@@ -42,30 +44,30 @@ void init_canshu()
   //舵机参数
   if( CAR_MODEL==1 )
   {
-    Mid_duty=7400;
-    Kp1=14;  //16
-    Kp2=0.65;
-    Kd=5.7;
+    Mid_duty=7400;     //100         //110
+    Kp1=14;          //14               //14
+    Kp2=0.68;          //0.65         //0.68
+    Kd=5.7;            //5.7         //5.7
     MID_dir_duty=7400;  //7780
     MAX_dir_duty=8400;  //8740
     MIN_dir_duty=6400;  //6880
   }
   else if(CAR_MODEL==2 )
   {
-    Mid_duty=7740;
-    Kp1=14;  //15
-    Kp2=0.6;        //0.36
-    Kd=6.5;        //4.36
+    Mid_duty=7740;      //100     //110     //110    加权调远
+    Kp1=13;             //14      //14       //13
+    Kp2=0.55;            //0.6     //0.65      //0.55
+    Kd=5.5;             //6.5     7.0      //5.5
     MID_dir_duty=7740;  //7780
     MAX_dir_duty=8740;  //8740
     MIN_dir_duty=6740;  //6880
   }
   else if(CAR_MODEL==3 )
   {
-    Mid_duty=7530;
-    Kp1=14;  //16
-    Kp2=0.36;
-    Kd=4.55;
+    Mid_duty=7530;      //100           //110       //110       加权调远    120
+    Kp1=11.5;           //12.5          //13          //  11.5        12.8
+    Kp2=0.54;           //0.65          //0.75      //     0.54        0.64
+    Kd=5.0;               //7           //8.0        //    5.00     5.00
     MID_dir_duty=7530;
     MAX_dir_duty=8530;
     MIN_dir_duty=6530;
@@ -80,6 +82,7 @@ void init_canshu()
     MAX_dir_duty=8500;
     MIN_dir_duty=6550;
   }
+
   //设置车第几个环道寻线行驶方向
   follow_huan_set[1]=0;   // 1 为寻左线，0为寻右线 2为两车都寻左线，3为两车都寻右线
   follow_huan_set[2]=0;

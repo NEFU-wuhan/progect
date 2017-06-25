@@ -29,6 +29,8 @@ extern int16 Ramp_Len_Set;    //上坡长度     160
 extern int8 Ramp_en;     //坡道使能
 extern uint8 Ramp_yushibie;
 extern uint8 Ramp_Len_yu;
+extern int32 Ramp_Len;           //  上坡步数
+
 
 
 #endif

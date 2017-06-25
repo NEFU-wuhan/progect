@@ -278,7 +278,7 @@ void speed_input()
 //       printf("%d/n",speedwant);      speedwantC
 //       printf("%d\n",s_distance);
 //   if(fiag_huan) speedwant=0;
-   if( Ramp_flag==1 ) speedwant=90;
+   if( Ramp_flag!=0 ) speedwant=80;
 
 }
 
